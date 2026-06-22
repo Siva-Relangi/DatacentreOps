@@ -1,0 +1,45 @@
+package com.datacentreops.workorder.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "work_order")
+@Getter
+@Setter
+@NoArgsConstructor
+public class WorkOrder {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long workOrderId;
+
+    @NotNull
+    private Long customerId;
+
+    private Long rackId;
+    private Long assetId;
+
+    @Enumerated(EnumType.STRING)
+    private WorkOrderType requestType;
+
+    @Column(length = 2000)
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private WorkOrderPriority priority = WorkOrderPriority.STANDARD;
+
+    private Long requestedById;
+    private Long assignedEngineerId;
+
+    private LocalDateTime requestedDate = LocalDateTime.now();
+    private LocalDateTime completionDate;
+
+    @Enumerated(EnumType.STRING)
+    private WorkOrderStatus status = WorkOrderStatus.OPEN;
+}
