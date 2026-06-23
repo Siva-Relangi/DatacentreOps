@@ -5,6 +5,7 @@ import com.datacentreops.customer.entity.ColoContract;
 import com.datacentreops.customer.entity.ContractStatus;
 import com.datacentreops.customer.mapper.ContractMapper;
 import com.datacentreops.customer.service.ColoContractService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class ColoContractController {
     }
 
     @PostMapping
-    public ContractResponseDTO create(@RequestBody ContractRequestDTO dto) {
+    public ContractResponseDTO create(@Valid @RequestBody ContractRequestDTO dto) {
         ColoContract saved = service.create(ContractMapper.toEntity(dto));
         return ContractMapper.toDTO(saved);
     }
@@ -40,7 +41,7 @@ public class ColoContractController {
 
     @PutMapping("/{id}")
     public ContractResponseDTO update(@PathVariable Long id,
-                                      @RequestBody ContractRequestDTO dto) {
+                                      @Valid @RequestBody ContractRequestDTO dto) {
 
         return ContractMapper.toDTO(
                 service.update(id, ContractMapper.toEntity(dto))

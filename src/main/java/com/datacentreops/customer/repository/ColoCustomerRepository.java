@@ -9,5 +9,5 @@ import java.util.List;
 public interface ColoCustomerRepository extends JpaRepository<ColoCustomer, Long> {
     List<ColoCustomer> findByStatus(CustomerStatus status);
     List<ColoCustomer> findByAccountManagerId(Long accountManagerId);
-    List<ColoCustomer> findByIndustrySegment(String industrySegment);
+    boolean existsByCompanyName(String companyName);
 }

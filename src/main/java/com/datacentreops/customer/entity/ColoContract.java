@@ -25,6 +25,12 @@ public class ColoContract {
 
     private Double powerCommittedKW;
 
+    private LocalDate contractStart;
+
+    private LocalDate contractEnd;
+
+    private String slaTier;
+
     private Double monthlyCost;
 
     @Enumerated(EnumType.STRING)

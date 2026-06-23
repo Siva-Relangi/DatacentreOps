@@ -26,6 +26,9 @@ public class ColoCustomerService {
     //  CREATE
     public ColoCustomer create(ColoCustomer entity) {
         validate(entity);
+        if(repository.existsByCompanyName(entity.getCompanyName())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Company already exists");
+        }
         return repository.save(entity);
     }
 
@@ -68,7 +71,9 @@ public class ColoCustomerService {
 
     //  VALIDATION
     private void validate(ColoCustomer entity) {
-        // future IAM checks
+        if (entity.getCompanyName() == null || entity.getCompanyName().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company name is required");
+        }
     }
 
     //  SEARCH

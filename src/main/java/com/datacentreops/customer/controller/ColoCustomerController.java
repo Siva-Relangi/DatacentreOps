@@ -6,6 +6,7 @@ import com.datacentreops.customer.entity.ColoCustomer;
 import com.datacentreops.customer.entity.CustomerStatus;
 import com.datacentreops.customer.mapper.CustomerMapper;
 import com.datacentreops.customer.service.ColoCustomerService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class ColoCustomerController {
     }
 
     @PostMapping
-    public CustomerResponseDTO create(@RequestBody CustomerRequestDTO dto) {
+    public CustomerResponseDTO create(@Valid @RequestBody CustomerRequestDTO dto) {
         ColoCustomer saved = service.create(CustomerMapper.toEntity(dto));
         return CustomerMapper.toDTO(saved);
     }
@@ -41,7 +42,7 @@ public class ColoCustomerController {
 
     @PutMapping("/{id}")
     public CustomerResponseDTO update(@PathVariable Long id,
-                                      @RequestBody CustomerRequestDTO dto) {
+                                      @Valid @RequestBody CustomerRequestDTO dto) {
 
         ColoCustomer updated = service.update(id, CustomerMapper.toEntity(dto));
         return CustomerMapper.toDTO(updated);

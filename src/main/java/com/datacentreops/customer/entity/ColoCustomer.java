@@ -1,7 +1,6 @@
 package com.datacentreops.customer.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +17,7 @@ public class ColoCustomer {
     @Column(name = "customer_id")
     private Long customerId;
 
-    @NotBlank
+    @Column(nullable = false, unique = true)
     private String companyName;
 
     private String industrySegment;
@@ -27,7 +26,8 @@ public class ColoCustomer {
 
     private Long accountManagerId;
 
-    private String kycStatus;
+    @Enumerated(EnumType.STRING)
+    private KycStatus kycStatus = KycStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     private CustomerStatus status = CustomerStatus.ACTIVE;

@@ -1,6 +1,7 @@
 package com.datacentreops.customer.dto;
 
 import com.datacentreops.customer.entity.CustomerStatus;
+import com.datacentreops.customer.entity.KycStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,6 @@ public class CustomerResponseDTO {
     private String industrySegment;
     private String contactPerson;
     private Long accountManagerId;
-    private String kycStatus;
+    private KycStatus kycStatus;
     private CustomerStatus status;
 }

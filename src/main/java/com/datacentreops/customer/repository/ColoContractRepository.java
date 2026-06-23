@@ -9,5 +9,5 @@ import java.util.List;
 public interface ColoContractRepository extends JpaRepository<ColoContract, Long> {
     List<ColoContract> findByCustomerId(Long customerId);
     List<ColoContract> findByStatus(ContractStatus status);
-    List<ColoContract> findByContractType(String contractType);
+    List<ColoContract> findByContractType(ContractType contractType);
 }

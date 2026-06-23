@@ -12,6 +12,9 @@ public class ContractMapper {
         contract.setAllocatedRacks(dto.getAllocatedRacks());
         contract.setPowerCommittedKW(dto.getPowerCommittedKW());
         contract.setMonthlyCost(dto.getMonthlyCost());
+        contract.setContractStart(dto.getContractStart());
+        contract.setContractEnd(dto.getContractEnd());
+        contract.setSlaTier(dto.getSlaTier());
         return contract;
     }
 
@@ -23,6 +26,9 @@ public class ContractMapper {
         dto.setAllocatedRacks(entity.getAllocatedRacks());
         dto.setPowerCommittedKW(entity.getPowerCommittedKW());
         dto.setMonthlyCost(entity.getMonthlyCost());
+        dto.setContractStart(entity.getContractStart());
+        dto.setContractEnd(entity.getContractEnd());
+        dto.setSlaTier(entity.getSlaTier());
         dto.setStatus(entity.getStatus().name());
         return dto;
     }

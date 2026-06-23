@@ -27,10 +27,28 @@ public class ColoContractService {
         if (!customerRepository.existsById(entity.getCustomerId())) {
             throw new ResourceNotFoundException("Customer", entity.getCustomerId());
         }
-
+        validate(entity);
         return repository.save(entity);
     }
 
+    private void validate(ColoContract entity) {
+
+        if(entity.getAllocatedRacks() == null || entity.getAllocatedRacks() <= 0) {
+            throw new IllegalArgumentException("Allocated racks must be greater than 0");
+        }
+
+        if(entity.getPowerCommittedKW() == null || entity.getPowerCommittedKW() <= 0) {
+            throw new IllegalArgumentException("Power committed must be greater than 0");
+        }
+
+        if(entity.getMonthlyCost() == null || entity.getMonthlyCost() <= 0) {
+            throw new IllegalArgumentException("Monthly cost must be greater than 0");
+        }
+
+        if(entity.getContractStart() != null && entity.getContractEnd() != null && entity.getContractEnd().isBefore(entity.getContractStart())) {
+            throw new IllegalArgumentException("Contract end date cannot be before start date");
+        }
+    }
     //  GET ALL
     public List<ColoContract> findAll() {
         return repository.findAll();
@@ -51,6 +69,9 @@ public class ColoContractService {
         existing.setAllocatedRacks(entity.getAllocatedRacks());
         existing.setPowerCommittedKW(entity.getPowerCommittedKW());
         existing.setMonthlyCost(entity.getMonthlyCost());
+        existing.setContractStart(entity.getContractStart());
+        existing.setContractEnd(entity.getContractEnd());  
+        existing.setSlaTier(entity.getSlaTier());
 
         return repository.save(existing);
     }
