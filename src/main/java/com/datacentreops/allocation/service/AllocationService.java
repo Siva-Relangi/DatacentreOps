@@ -79,6 +79,7 @@ public class AllocationService {
         reservation.setExpiryDate(contract.getContractEnd());
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservationRepository.save(reservation);
+        contract.setStatus(ContractStatus.ALLOCATED);
 
         CapacitySnapshot snapshot = snapshotRepository.findTopByHallIdAndStatusOrderBySnapshotDateDesc(request.getHallId(),SnapshotStatus.CURRENT);
         if (snapshot != null) {
