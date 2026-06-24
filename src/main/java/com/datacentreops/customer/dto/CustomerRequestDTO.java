@@ -2,7 +2,7 @@ package com.datacentreops.customer.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import com.datacentreops.customer.entity.KYCStatus;
+import com.datacentreops.customer.entity.KycStatus;
 import jakarta.validation.constraints.NotBlank;
 
 @Getter
@@ -14,5 +14,5 @@ public class CustomerRequestDTO {
     private String industrySegment;
     private String contactPerson;
     private Long accountManagerId;
-    private KYCStatus kycStatus;
+    private KycStatus kycStatus;
 }

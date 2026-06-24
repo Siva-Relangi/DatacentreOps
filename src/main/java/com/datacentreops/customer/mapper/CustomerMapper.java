@@ -2,7 +2,7 @@ package com.datacentreops.customer.mapper;
 
 import com.datacentreops.customer.dto.CustomerRequestDTO;
 import com.datacentreops.customer.dto.CustomerResponseDTO;
-import com.datacentreops.customer.enums.KycStatus;
+import com.datacentreops.customer.entity.KycStatus;
 import com.datacentreops.customer.entity.ColoCustomer;
 
 public class CustomerMapper {

@@ -29,7 +29,7 @@ public class ContractMapper {
         dto.setContractStart(entity.getContractStart());
         dto.setContractEnd(entity.getContractEnd());
         dto.setSlaTier(entity.getSlaTier());
-        dto.setStatus(entity.getStatus().name());
+        dto.setStatus(entity.getStatus());
         return dto;
     }
 }

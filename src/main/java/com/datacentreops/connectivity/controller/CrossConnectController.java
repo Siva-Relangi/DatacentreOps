@@ -75,4 +75,9 @@ public class CrossConnectController {
                 .map(CrossConnectMapper::toDTO)
                 .toList();
     }
+
+    @PatchMapping("/{id}/status")
+    public CrossConnectResponseDTO changeStatus(@PathVariable Long id, @RequestParam CrossConnectStatus status){
+        return CrossConnectMapper.toDTO(service.changeStatus(id, status));
+    }
 }

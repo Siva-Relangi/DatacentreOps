@@ -81,7 +81,7 @@ public class DataSeeder implements CommandLineRunner {
         acme.setCompanyName("Acme Cloud Ltd");
         acme.setIndustrySegment("CloudProvider");
         acme.setContactPerson("Jane Doe");
-        acme.setKycStatus("Verified");
+        acme.setKycStatus(KycStatus.PENDING);
         acme.setStatus(CustomerStatus.ACTIVE);
         acme = customers.save(acme);
 

@@ -6,11 +6,20 @@ import com.datacentreops.connectivity.entity.CrossConnectStatus;
 import com.datacentreops.connectivity.repository.CarrierPresenceRepository;
 import com.datacentreops.connectivity.repository.CrossConnectRepository;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.infrastructure.entity.InstalledAsset;
 import com.datacentreops.infrastructure.repository.InstalledAssetRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
+import com.datacentreops.notification.repository.NotificationRepository;
+import com.datacentreops.notification.entity.*;
+import com.datacentreops.iam.entity.*;
+
+
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,19 +30,25 @@ public class CrossConnectService {
     private final CarrierPresenceRepository carrierRepository;
     private final RackRepository rackRepository;
     private final InstalledAssetRepository assetRepository;
+    private final NotificationRepository notificationRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public CrossConnectService(
             CrossConnectRepository repository,
             ColoCustomerRepository customerRepository,
             CarrierPresenceRepository carrierRepository,
             RackRepository rackRepository,
-            InstalledAssetRepository assetRepository) {
+            InstalledAssetRepository assetRepository, 
+            NotificationRepository notificationRepository, 
+            AuditLogRepository auditLogRepository) {
 
         this.repository = repository;
         this.customerRepository = customerRepository;
         this.carrierRepository = carrierRepository;
         this.rackRepository = rackRepository;
         this.assetRepository = assetRepository;
+        this.notificationRepository = notificationRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
@@ -121,6 +136,26 @@ public class CrossConnectService {
             throw new IllegalArgumentException("portA and portZ cannot be same");
         }
     }
+
+    public CrossConnect changeStatus(Long id, CrossConnectStatus status) {
+        CrossConnect crossConnect = findById(id);
+        crossConnect.setStatus(status);
+        if (status == CrossConnectStatus.PROVISIONED) {
+            crossConnect.setProvisionedDate(LocalDate.now());
+        }
+        CrossConnect saved = repository.save(crossConnect);
+        Notification notification = new Notification();
+        notification.setUserId(saved.getCustomerId());
+        notification.setMessage("Cross Connect " + saved.getCrossConnectId() + " changed to " + status);
+        notificationRepository.save(notification);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.STATUS_CHANGE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(saved.getCrossConnectId());
+        auditLogRepository.save(audit);
+        return saved;
+    }
+ 
 
     //  SEARCH
     public List<CrossConnect> findByCustomer(Long customerId) {

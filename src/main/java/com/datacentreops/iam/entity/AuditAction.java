@@ -7,5 +7,6 @@ public enum AuditAction {
     LOGIN,
     REGISTER,
     ASSIGN,
+    ALLOCATE,
     STATUS_CHANGE
 }

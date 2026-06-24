@@ -2,13 +2,19 @@ package com.datacentreops.workorder.service;
 
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.iam.repository.UserRepository;
 import com.datacentreops.infrastructure.repository.InstalledAssetRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
+import com.datacentreops.notification.entity.Notification;
+import com.datacentreops.notification.repository.NotificationRepository;
 import com.datacentreops.workorder.entity.WorkOrder;
 import com.datacentreops.workorder.entity.WorkOrderStatus;
 import com.datacentreops.workorder.repository.WorkOrderNoteRepository;
 import com.datacentreops.workorder.repository.WorkOrderRepository;
+import com.datacentreops.iam.entity.EntityType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +31,8 @@ public class WorkOrderService {
     private final InstalledAssetRepository assetRepository;
     private final UserRepository userRepository;
     private final WorkOrderNoteRepository noteRepository;
+    private final NotificationRepository notificationRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public WorkOrderService(
             WorkOrderRepository repository,
@@ -32,7 +40,9 @@ public class WorkOrderService {
             RackRepository rackRepository,
             InstalledAssetRepository assetRepository,
             UserRepository userRepository,
-            WorkOrderNoteRepository noteRepository) {
+            WorkOrderNoteRepository noteRepository,
+            NotificationRepository notificationRepository,
+            AuditLogRepository auditLogRepository) {
 
         this.repository = repository;
         this.customerRepository = customerRepository;
@@ -40,6 +50,8 @@ public class WorkOrderService {
         this.assetRepository = assetRepository;
         this.userRepository = userRepository;
         this.noteRepository = noteRepository;
+        this.notificationRepository = notificationRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
@@ -113,32 +125,49 @@ public class WorkOrderService {
 
     //  ASSIGN ENGINEER
     public WorkOrder assign(Long id, Long engineerId) {
-
         if (!userRepository.existsById(engineerId)) {
             throw new ResourceNotFoundException("User", engineerId);
         }
-
-        WorkOrder w = findById(id);
-
-        w.setAssignedEngineerId(engineerId);
-        w.setStatus(WorkOrderStatus.ASSIGNED);
-
-        return repository.save(w);
+        WorkOrder workOrder = findById(id);
+        workOrder.setAssignedEngineerId(engineerId);
+        workOrder.setStatus(WorkOrderStatus.ASSIGNED);
+        WorkOrder saved = repository.save(workOrder);
+        Notification notification = new Notification();
+        notification.setUserId(engineerId);
+        notification.setMessage("Work Order " + saved.getWorkOrderId() + " assigned to you");
+        notificationRepository.save(notification);
+        AuditLog audit = new AuditLog();
+        audit.setUserId(engineerId);
+        audit.setAction(AuditAction.ASSIGN);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(saved.getWorkOrderId());
+        auditLogRepository.save(audit);
+        return saved;
     }
+ 
 
     //  CHANGE STATUS
     public WorkOrder changeStatus(Long id, WorkOrderStatus status) {
-
-        WorkOrder w = findById(id);
-
-        w.setStatus(status);
-
+        WorkOrder workOrder = findById(id);
+        workOrder.setStatus(status);
         if (status == WorkOrderStatus.COMPLETED) {
-            w.setCompletionDate(LocalDateTime.now());
+            workOrder.setCompletionDate(LocalDateTime.now());
         }
-
-        return repository.save(w);
+        
+        WorkOrder saved = repository.save(workOrder);
+        Notification notification = new Notification();
+        notification.setUserId(saved.getRequestedById());
+        notification.setMessage("Work Order " + saved.getWorkOrderId() + " changed to " + status);
+        notificationRepository.save(notification);
+        AuditLog audit = new AuditLog();
+        audit.setUserId(saved.getRequestedById());
+        audit.setAction(AuditAction.STATUS_CHANGE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(saved.getWorkOrderId());
+        auditLogRepository.save(audit);
+        return saved;
     }
+ 
 
     //  SEARCH
     public List<WorkOrder> findByCustomer(Long customerId) {
