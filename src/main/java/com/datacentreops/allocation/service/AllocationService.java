@@ -53,7 +53,7 @@ public class AllocationService {
         Long customerId = contract.getCustomerId();
         Integer rackCount = contract.getAllocatedRacks();
         Double powerKW = contract.getPowerCommittedKW();
-        List<Rack> availableRacks =rackRepository.findAll().stream().filter(r -> request.getHallId()
+        List<Rack> availableRacks = rackRepository.findAll().stream().filter(r -> request.getHallId()
                                                 .equals(r.getHallId()) && r.getStatus() == RackStatus.AVAILABLE).limit(rackCount).toList();
         if (availableRacks.size() < rackCount) {
             throw new IllegalStateException("Not enough racks available. Requested: " + rackCount + ", Available: " + availableRacks.size());
@@ -65,8 +65,7 @@ public class AllocationService {
                 rack.setUsedU(0);
             }
             if (rack.getAvailableU() == null && rack.getTotalU() != null) {
-                rack.setAvailableU(
-                rack.getTotalU());
+                rack.setAvailableU(rack.getTotalU());
             }
             rackRepository.save(rack);
         }

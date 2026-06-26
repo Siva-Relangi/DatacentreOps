@@ -12,11 +12,7 @@ public class RackMapper {
         r.setHallId(dto.getHallId());
         r.setRackLabel(dto.getRackLabel());
         r.setTotalU(dto.getTotalU());
-        r.setUsedU(dto.getUsedU());
-        r.setAvailableU(dto.getAvailableU());
         r.setMaxPowerKW(dto.getMaxPowerKW());
-        r.setAllocatedPowerKW(dto.getAllocatedPowerKW());
-        r.setCustomerId(dto.getCustomerId());
 
         return r;
     }

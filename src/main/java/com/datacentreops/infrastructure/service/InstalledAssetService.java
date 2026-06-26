@@ -36,37 +36,26 @@ public class InstalledAssetService {
     public InstalledAsset create(InstalledAsset asset) {
         validate(asset);
         Rack rack = rackRepository.findById(asset.getRackId())
-                    .orElseThrow(() ->new ResourceNotFoundException("Rack", asset.getRackId()));
-        int currentUsedU = rack.getUsedU() == null ? 0 : rack.getUsedU();
-        int assetU = asset.getUHeight() == null ? 0 : asset.getUHeight();
-        rack.setUsedU(currentUsedU + assetU);
-        if (rack.getTotalU() != null) {
-            rack.setAvailableU(
-            rack.getTotalU() - rack.getUsedU());
-        }
-        double currentPower = rack.getAllocatedPowerKW() == null ? 0 : rack.getAllocatedPowerKW();
-        double assetPower = asset.getPowerDrawW() == null ? 0 : asset.getPowerDrawW() / 1000.0;
-        rack.setAllocatedPowerKW(currentPower + assetPower);
-        rackRepository.save(rack);
+                .orElseThrow(() -> new ResourceNotFoundException("Rack", asset.getRackId()));
+
+        validateRackCapacity(rack, asset);
+
+        asset.setStatus(AssetStatus.ACTIVE);
         InstalledAsset saved = repository.save(asset);
+
+        recalculateRack(asset.getRackId());
+
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.CREATE);
-        log.setEntityType(EntityType.RACK);
+        log.setEntityType(EntityType.ASSET);
         log.setRecordId(saved.getAssetId());
         auditLogRepository.save(log);
         return saved;
     }
 
-    public List<InstalledAsset> findAll() {
-        return repository.findAll();
-    }
-
-    public InstalledAsset findById(Long id) {
-        return repository.findById(id).orElseThrow(() ->new ResourceNotFoundException("InstalledAsset", id));
-    }
-
     public InstalledAsset update(Long id, InstalledAsset asset) {
         InstalledAsset existing = findById(id);
+        Long oldRackId = existing.getRackId();
         existing.setRackId(asset.getRackId());
         existing.setCustomerId(asset.getCustomerId());
         existing.setAssetType(asset.getAssetType());
@@ -79,7 +68,61 @@ public class InstalledAssetService {
         existing.setInstalledDate(asset.getInstalledDate());
         existing.setStatus(asset.getStatus());
         validate(existing);
-        return repository.save(existing);
+        Rack rack = rackRepository.findById(existing.getRackId())
+                .orElseThrow(() -> new ResourceNotFoundException("Rack", existing.getRackId()));
+
+        validateRackCapacity(rack, existing);
+
+        InstalledAsset saved = repository.save(existing);
+
+        recalculateRack(oldRackId);
+
+        if (!oldRackId.equals(existing.getRackId())) {
+            recalculateRack(existing.getRackId());
+        }
+        return saved;
+    }
+
+    private void validateRackCapacity(Rack rack, InstalledAsset asset) {
+        int usedU = repository.findByRackId(rack.getRackId()).stream().filter(a -> a.getUHeight() != null)
+                    .mapToInt(InstalledAsset::getUHeight).sum();
+        int assetU = asset.getUHeight() == null ? 0 : asset.getUHeight();
+
+        if (usedU + assetU > rack.getTotalU()) {
+            throw new IllegalArgumentException("Not enough rack U space");
+        }
+
+        double currentPower = repository.findByRackId(rack.getRackId()).stream().filter(a -> a.getPowerDrawW() != null)
+                              .mapToDouble(a -> a.getPowerDrawW() / 1000.0).sum();
+        double assetPower = asset.getPowerDrawW() == null ? 0 : asset.getPowerDrawW() / 1000.0;
+        if (currentPower + assetPower > rack.getMaxPowerKW()) {
+            throw new IllegalArgumentException("Not enough rack power capacity");
+        }
+    }
+
+        private void recalculateRack(Long rackId) {
+        Rack rack = rackRepository.findById(rackId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rack", rackId));
+        List<InstalledAsset> assets = repository.findByRackId(rackId);
+        int usedU = assets.stream().filter(a -> a.getUHeight() != null)
+                    .mapToInt(InstalledAsset::getUHeight).sum();
+        double allocatedPower = assets.stream().filter(a -> a.getPowerDrawW() != null)
+                                .mapToDouble(a -> a.getPowerDrawW() / 1000.0).sum();
+
+        rack.setUsedU(usedU);
+        if (rack.getTotalU() != null) {
+            rack.setAvailableU(rack.getTotalU() - usedU);
+        }
+        rack.setAllocatedPowerKW(allocatedPower);
+        rackRepository.save(rack);
+    }
+
+    public List<InstalledAsset> findAll() {
+        return repository.findAll();
+    }
+
+    public InstalledAsset findById(Long id) {
+        return repository.findById(id).orElseThrow(() ->new ResourceNotFoundException("InstalledAsset", id));
     }
 
     public void delete(Long id) {

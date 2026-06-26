@@ -5,6 +5,7 @@ public enum EntityType {
     WORK_ORDER,
     DATA_HALL,
     RACK,
+    ASSET,
     CUSTOMER,
     NOTIFICATION,
     ENVIRONMENTAL,
