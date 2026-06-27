@@ -27,7 +27,7 @@ public class AppUserDetailsService implements UserDetailsService {
                 .orElseThrow(() ->
                         new UsernameNotFoundException("No user with email: " + email));
 
-        // ✅ ENUM-based status check
+        // ENUM-based status check
         boolean enabled =
                 user.getStatus() != UserStatus.SUSPENDED &&
                         user.getStatus() != UserStatus.INACTIVE;

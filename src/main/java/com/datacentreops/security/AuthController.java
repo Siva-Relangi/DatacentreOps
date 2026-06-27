@@ -41,11 +41,11 @@ public class AuthController {
         user.setName(req.name());
         user.setEmail(req.email());
         user.setPassword(req.password());
-        user.setRole(Role.COLO_CUSTOMER);   // ✅ ENUM
+        user.setRole(Role.COLO_CUSTOMER);   //  ENUM
         user.setPhone(req.phone());
         user.setOrganisationId(req.organisationId());
         user.setDataCentreId(req.dataCentreId());
-        user.setStatus(UserStatus.ACTIVE);  // ✅ ENUM
+        user.setStatus(UserStatus.ACTIVE);  //  ENUM
 
         User saved = userService.create(user);
 
@@ -53,7 +53,7 @@ public class AuthController {
 
         String token = jwtService.generateToken(
                 saved.getEmail(),
-                saved.getRole().name(),   // ✅ IMPORTANT
+                saved.getRole().name(),   //  IMPORTANT
                 saved.getUserId()
         );
 
