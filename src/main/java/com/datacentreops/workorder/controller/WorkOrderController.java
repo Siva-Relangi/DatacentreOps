@@ -20,7 +20,7 @@ public class WorkOrderController {
         this.service = service;
     }
 
-    // ✅ CREATE
+    //  CREATE
     @PostMapping
     public WorkOrderResponseDTO create(@RequestBody WorkOrderRequestDTO dto) {
 
@@ -30,7 +30,7 @@ public class WorkOrderController {
         return WorkOrderMapper.toDTO(saved);
     }
 
-    // ✅ GET ALL
+    //  GET ALL
     @GetMapping
     public List<WorkOrderResponseDTO> getAll() {
 
@@ -40,7 +40,7 @@ public class WorkOrderController {
                 .toList();
     }
 
-    // ✅ GET BY ID
+    //  GET BY ID
     @GetMapping("/{id}")
     public WorkOrderResponseDTO getById(@PathVariable Long id) {
 
@@ -49,7 +49,7 @@ public class WorkOrderController {
         );
     }
 
-    // ✅ UPDATE
+    //  UPDATE
     @PutMapping("/{id}")
     public WorkOrderResponseDTO update(
             @PathVariable Long id,
@@ -61,13 +61,13 @@ public class WorkOrderController {
         return WorkOrderMapper.toDTO(updated);
     }
 
-    // ✅ DELETE
+    //  DELETE
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
 
-    // ✅ SEARCH
+    //  SEARCH
     @GetMapping("/search")
     public List<WorkOrderResponseDTO> search(
             @RequestParam(required = false) Long customerId,
@@ -91,7 +91,7 @@ public class WorkOrderController {
                 .toList();
     }
 
-    // ✅ ASSIGN ENGINEER
+    // ASSIGN ENGINEER
     @PatchMapping("/{id}/assign")
     public WorkOrderResponseDTO assign(
             @PathVariable Long id,
@@ -102,7 +102,7 @@ public class WorkOrderController {
         );
     }
 
-    // ✅ CHANGE STATUS
+    // CHANGE STATUS
     @PatchMapping("/{id}/status")
     public WorkOrderResponseDTO changeStatus(
             @PathVariable Long id,

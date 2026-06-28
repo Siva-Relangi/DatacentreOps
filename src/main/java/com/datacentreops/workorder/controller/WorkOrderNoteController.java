@@ -18,7 +18,7 @@ public class WorkOrderNoteController {
         this.service = service;
     }
 
-    // ✅ CREATE
+    // CREATE
     @PostMapping
     public WorkOrderNoteResponseDTO create(@RequestBody WorkOrderNoteRequestDTO dto) {
 
@@ -27,7 +27,7 @@ public class WorkOrderNoteController {
         );
     }
 
-    // ✅ GET ALL
+    // GET ALL
     @GetMapping
     public List<WorkOrderNoteResponseDTO> getAll() {
 
@@ -37,20 +37,20 @@ public class WorkOrderNoteController {
                 .toList();
     }
 
-    // ✅ GET BY ID
+    // GET BY ID
     @GetMapping("/{id}")
     public WorkOrderNoteResponseDTO getById(@PathVariable Long id) {
 
         return WorkOrderNoteMapper.toDTO(service.findById(id));
     }
 
-    // ✅ DELETE
+    // DELETE
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
 
-    // ✅ FIND NOTES BY WORK ORDER
+    // FIND NOTES BY WORK ORDER
     @GetMapping("/by-work-order/{workOrderId}")
     public List<WorkOrderNoteResponseDTO> byWorkOrder(@PathVariable Long workOrderId) {
 

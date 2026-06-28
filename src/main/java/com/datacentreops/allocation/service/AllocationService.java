@@ -6,7 +6,6 @@ import com.datacentreops.capacity.entity.CapacitySnapshot;
 import com.datacentreops.capacity.entity.ReservationStatus;
 import com.datacentreops.capacity.entity.SnapshotStatus;
 import com.datacentreops.capacity.repository.CapacityReservationRepository;
-import com.datacentreops.capacity.repository.CapacitySnapshotRepository;
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.customer.entity.ColoContract;
 import com.datacentreops.customer.entity.ContractStatus;
@@ -26,20 +25,17 @@ public class AllocationService {
     private final RackRepository rackRepository;
     private final ColoContractRepository contractRepository;
     private final CapacityReservationRepository reservationRepository;
-    private final CapacitySnapshotRepository snapshotRepository;
     private final AuditLogRepository auditLogRepository;
 
     public AllocationService(
         RackRepository rackRepository,
         ColoContractRepository contractRepository,
         CapacityReservationRepository reservationRepository,
-        CapacitySnapshotRepository snapshotRepository,
         AuditLogRepository auditLogRepository) {
 
         this.rackRepository = rackRepository;
         this.contractRepository = contractRepository;
         this.reservationRepository = reservationRepository;
-        this.snapshotRepository = snapshotRepository;
         this.auditLogRepository = auditLogRepository;
     }
 
@@ -80,18 +76,6 @@ public class AllocationService {
         reservationRepository.save(reservation);
         contract.setStatus(ContractStatus.ALLOCATED);
 
-        CapacitySnapshot snapshot = snapshotRepository.findTopByHallIdAndStatusOrderBySnapshotDateDesc(request.getHallId(),SnapshotStatus.CURRENT);
-        if (snapshot != null) {
-            snapshot.setAllocatedRacks(snapshot.getAllocatedRacks() + rackCount);
-            snapshot.setAllocatedPowerKW(snapshot.getAllocatedPowerKW() + powerKW);
-            if (snapshot.getTotalRacks() != null && snapshot.getTotalRacks() > 0) {
-                snapshot.setSpaceUtilisationPercent((snapshot.getAllocatedRacks() * 100.0) / snapshot.getTotalRacks());
-            }
-            if (snapshot.getTotalPowerKW() != null && snapshot.getTotalPowerKW() > 0) {
-                snapshot.setPowerUtilisationPercent((snapshot.getAllocatedPowerKW() * 100.0) / snapshot.getTotalPowerKW());
-            }
-            snapshotRepository.save(snapshot);
-        }
         AuditLog log = new AuditLog();
         log.setUserId(request.getUserId());     
         log.setAction(AuditAction.ALLOCATE);
