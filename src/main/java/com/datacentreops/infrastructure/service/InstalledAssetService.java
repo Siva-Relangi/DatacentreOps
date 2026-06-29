@@ -95,6 +95,11 @@ public class InstalledAssetService {
             throw new ResourceNotFoundException("Customer", asset.getCustomerId());
         }
 
+        // Rack Allocated or not
+        Rack rack = rackRepository.findById(asset.getRackId()).orElseThrow(() -> new ResourceNotFoundException("Rack", asset.getRackId()));
+        if(asset.getCustomerId() != null && (rack.getCustomerId() == null || !rack.getCustomerId().equals(asset.getCustomerId()))){
+            throw new IllegalArgumentException("Rack is not allocated to this customer");
+        }
         if (asset.getUHeight() == null || asset.getUHeight() <= 0) {
             throw new IllegalArgumentException("U Height must be greater than 0");
         }
