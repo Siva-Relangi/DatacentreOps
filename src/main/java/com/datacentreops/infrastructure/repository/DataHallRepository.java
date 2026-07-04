@@ -11,4 +11,6 @@ public interface DataHallRepository extends JpaRepository<DataHall, Long> {
     List<DataHall> findByDataCentreId(Long dataCentreId);
 
     List<DataHall> findByStatus(HallStatus status);
+
+    boolean existsByHallNameAndDataCentreId(String hallName, Long dataCentreId);
 }

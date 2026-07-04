@@ -13,4 +13,8 @@ public interface RackRepository extends JpaRepository<Rack, Long> {
     List<Rack> findByCustomerId(Long customerId);
 
     List<Rack> findByStatus(RackStatus status);
+
+    boolean existsByHallIdAndRackLabel(Long hallId, String rackLabel);
+
+    boolean existsByHallIdAndRackLabelAndRackIdNot(Long hallId, String rackLabel, Long rackId);
 }
