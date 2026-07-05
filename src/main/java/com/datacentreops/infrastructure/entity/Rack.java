@@ -19,25 +19,23 @@ public class Rack {
     @Column(name = "rack_id")
     private Long rackId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long hallId;
 
+    @Column(nullable = false)
     private String rackLabel;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Integer totalU;
 
-    @PositiveOrZero
-    private Integer usedU;
+    private Integer usedU = 0;
 
-    @PositiveOrZero
     private Integer availableU;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Double maxPowerKW;
 
-    @PositiveOrZero
-    private Double allocatedPowerKW;
+    private Double allocatedPowerKW = 0.0;
 
     private Long customerId;
 

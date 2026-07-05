@@ -1,7 +1,6 @@
 package com.datacentreops.infrastructure.service;
 
 import com.datacentreops.common.ResourceNotFoundException;
-import com.datacentreops.customer.repository.ColoCustomerRepository;
 import com.datacentreops.iam.entity.AuditAction;
 import com.datacentreops.iam.entity.AuditLog;
 import com.datacentreops.iam.entity.EntityType;
@@ -23,28 +22,24 @@ public class RackService {
     private final RackRepository repository;
     private final DataHallRepository dataHallRepository;
     private final InstalledAssetRepository assetRepository;
-    private final ColoCustomerRepository customerRepository;
     private final AuditLogRepository auditLogRepository;
 
     public RackService(
             RackRepository repository,
             DataHallRepository dataHallRepository,
             InstalledAssetRepository assetRepository,
-            ColoCustomerRepository customerRepository,
             AuditLogRepository auditLogRepository) {
 
         this.repository = repository;
         this.dataHallRepository = dataHallRepository;
         this.assetRepository = assetRepository;
-        this.customerRepository = customerRepository;
         this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
     public Rack create(Rack r) {
-        validate(r);
 
-        if(!dataHallRepository.existsById(r.getRackId())){
+        if(!dataHallRepository.existsById(r.getHallId())){
             throw new ResourceNotFoundException("DataHall", r.getHallId());
         }
 
@@ -57,14 +52,15 @@ public class RackService {
         r.setAllocatedPowerKW(0.0);
         r.setStatus(RackStatus.AVAILABLE);
 
+        Rack saved = repository.save(r);
         // AuditLog
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.CREATE);
         log.setEntityType(EntityType.RACK);
-        log.setRecordId(r.getRackId());
+        log.setRecordId(saved.getRackId());
         auditLogRepository.save(log);
 
-        return repository.save(r);
+        return saved;
     }
 
     // GET ALL
@@ -83,20 +79,17 @@ public class RackService {
 
         Rack existing = findById(id);
 
+        if (!dataHallRepository.existsById(r.getHallId())) {
+            throw new ResourceNotFoundException("DataHall", r.getHallId());
+        }
+
         existing.setHallId(r.getHallId());
         existing.setRackLabel(r.getRackLabel());
         existing.setTotalU(r.getTotalU());
-        existing.setUsedU(r.getUsedU());
-        existing.setAvailableU(r.getAvailableU());
         existing.setMaxPowerKW(r.getMaxPowerKW());
-        existing.setAllocatedPowerKW(r.getAllocatedPowerKW());
-        existing.setCustomerId(r.getCustomerId());
-        existing.setStatus(r.getStatus());
-
-        validate(existing);
 
         int usedU = existing.getUsedU() == null ? 0 : existing.getUsedU();
-        if(r.getTotalU() <= usedU){
+        if(r.getTotalU() < usedU){
             throw new IllegalArgumentException("Total U cannot be less than current used U");
         }
 
@@ -108,6 +101,7 @@ public class RackService {
         if(repository.existsByHallIdAndRackLabelAndRackIdNot(r.getHallId(), r.getRackLabel(), id)){
             throw new IllegalArgumentException("Rack label already exists in this Hall");
         }
+
 
         // AuditLog
         AuditLog log = new AuditLog();
@@ -138,28 +132,6 @@ public class RackService {
         log.setRecordId(id);
         auditLogRepository.save(log);
         repository.deleteById(id);
-    }
-
-    //  VALIDATION
-    private void validate(Rack r) {
-
-        if(r.getRackLabel() == null || r.getRackLabel().isBlank()){
-            throw new IllegalArgumentException("Rack Label is required");
-        }
-
-        if(r.getTotalU() == null || r.getTotalU() <= 0){
-            throw new IllegalArgumentException("Total U must be greater than 0");
-        }
-
-        if(r.getMaxPowerKW() == null || r.getMaxPowerKW() <= 0){
-            throw new IllegalArgumentException("Maximum Power must be greater than 0");
-        }
-
-        if (r.getCustomerId() != null &&
-                !customerRepository.existsById(r.getCustomerId())) {
-            throw new ResourceNotFoundException("Customer", r.getCustomerId());
-        }
-
     }
 
     //  SEARCH

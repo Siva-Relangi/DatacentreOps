@@ -86,10 +86,6 @@ public class InstalledAssetService {
 
     private void validate(InstalledAsset asset) {
 
-        if (asset.getRackId() == null) {
-            throw new IllegalArgumentException("Rack is required");
-        }
-
         if (asset.getCustomerId() != null &&
                 !customerRepository.existsById(asset.getCustomerId())) {
             throw new ResourceNotFoundException("Customer", asset.getCustomerId());
@@ -99,21 +95,6 @@ public class InstalledAssetService {
         Rack rack = rackRepository.findById(asset.getRackId()).orElseThrow(() -> new ResourceNotFoundException("Rack", asset.getRackId()));
         if(asset.getCustomerId() != null && (rack.getCustomerId() == null || !rack.getCustomerId().equals(asset.getCustomerId()))){
             throw new IllegalArgumentException("Rack is not allocated to this customer");
-        }
-        if (asset.getUHeight() == null || asset.getUHeight() <= 0) {
-            throw new IllegalArgumentException("U Height must be greater than 0");
-        }
-
-        if (asset.getPowerDrawW() == null || asset.getPowerDrawW() <= 0) {
-            throw new IllegalArgumentException("Power Draw must be greater than 0");
-        }
-
-        if (asset.getAssetType() == null || asset.getAssetType().isBlank()) {
-            throw new IllegalArgumentException("Asset Type is required");
-        }
-
-        if (asset.getSerialNumber() == null || asset.getSerialNumber().isBlank()) {
-            throw new IllegalArgumentException("Serial Number is required");
         }
     }
 

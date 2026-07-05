@@ -74,6 +74,7 @@ public class SecurityConfig {
                         //  INFRASTRUCTURE CONFIG
                         .requestMatchers(HttpMethod.POST, "/api/infrastructure/data-halls/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/infrastructure/data-halls/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/infrastructure/data-halls/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/infrastructure/data-halls/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/infrastructure/racks/**").hasRole("ADMIN")

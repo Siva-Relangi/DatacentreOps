@@ -19,20 +19,22 @@ public class DataHall {
     @Column(name = "hall_id")
     private Long hallId;
 
+    @Column(nullable = false)
     private Long dataCentreId;
 
-    @NotBlank
+    @Column(nullable = false, unique = true)
     private String hallName;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Integer totalRacks;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Double totalPowerKW;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Double coolingCapacityKW;
 
+    @Column(nullable = false)
     private String tierLevel;
 
     @Enumerated(EnumType.STRING)

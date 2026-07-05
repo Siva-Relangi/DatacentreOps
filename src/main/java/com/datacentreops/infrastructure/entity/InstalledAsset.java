@@ -1,8 +1,6 @@
 package com.datacentreops.infrastructure.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,26 +19,27 @@ public class InstalledAsset {
     @Column(name = "asset_id")
     private Long assetId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long rackId;
 
     private Long customerId;
 
+    @Column(nullable = false)
     private String assetType;
 
     private String make;
 
     private String model;
 
+    @Column(nullable = false, unique = true)
     private String serialNumber;
 
-    @PositiveOrZero
     private Integer uPosition;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Integer uHeight;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Double powerDrawW;
 
     private LocalDate installedDate;

@@ -51,6 +51,16 @@ public class DataHallController {
         );
     }
 
+    @PatchMapping("/{id}/status")
+    public DataHallResponseDTO changeStatus(
+            @PathVariable Long id, 
+            @RequestParam HallStatus status) {
+
+        return DataHallMapper.toDTO(
+                service.changeStatus(id, status)
+        );
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
