@@ -6,6 +6,7 @@ import com.datacentreops.iam.entity.Role;
 import com.datacentreops.iam.entity.UserStatus;
 import com.datacentreops.iam.mapper.UserMapper;
 import com.datacentreops.iam.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDTO create(@RequestBody UserRequestDTO dto) {
+    public UserResponseDTO create(@Valid @RequestBody UserRequestDTO dto) {
 
         return UserMapper.toDTO(
                 service.create(UserMapper.toEntity(dto))
@@ -43,7 +44,7 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponseDTO update(
             @PathVariable Long id,
-            @RequestBody UserRequestDTO dto) {
+            @Valid @RequestBody UserRequestDTO dto) {
 
         return UserMapper.toDTO(
                 service.update(id, UserMapper.toEntity(dto))

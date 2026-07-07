@@ -20,12 +20,13 @@ public class Notification {
     @Column(name = "notification_id")
     private Long notificationId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long userId;
 
-    @Column(length = 1000)
+    @Column(nullable = false, length = 1000)
     private String message;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NotificationCategory category;
 

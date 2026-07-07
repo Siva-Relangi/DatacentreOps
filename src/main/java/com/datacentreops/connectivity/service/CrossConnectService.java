@@ -135,6 +135,10 @@ public class CrossConnectService {
                 entity.getPortA().equals(entity.getPortZ())) {
             throw new IllegalArgumentException("portA and portZ cannot be same");
         }
+
+        if(entity.getProvisionedDate() != null && entity.getOrderDate() != null && entity.getProvisionedDate().isBefore(entity.getOrderDate())){
+            throw new IllegalArgumentException("Provisioned date cannot be before order date");
+        }
     }
 
     public CrossConnect changeStatus(Long id, CrossConnectStatus status) {

@@ -19,6 +19,10 @@ public class CarrierPresenceService {
 
     // CREATE
     public CarrierPresence create(CarrierPresence entity) {
+
+        if(repository.findByDataCentreId(entity.getDataCentreId()).stream().anyMatch(c -> c.getCarrierName().equalsIgnoreCase(entity.getCarrierName()))){
+            throw new IllegalArgumentException("Carrier already exists in this Data Centre");
+        }
         return repository.save(entity);
     }
 
@@ -37,6 +41,10 @@ public class CarrierPresenceService {
     public CarrierPresence update(Long id, CarrierPresence c) {
 
         CarrierPresence existing = findById(id);
+
+        if(repository.findByDataCentreId(existing.getDataCentreId()).stream().anyMatch(name -> name.getCarrierName().equalsIgnoreCase(c.getCarrierName()))){
+            throw new IllegalArgumentException("Carrier already exists in this Data Centre");
+        }
 
         existing.setCarrierName(c.getCarrierName());
         existing.setServiceType(c.getServiceType());

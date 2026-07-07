@@ -4,6 +4,7 @@ import com.datacentreops.notification.dto.*;
 import com.datacentreops.notification.entity.*;
 import com.datacentreops.notification.mapper.NotificationMapper;
 import com.datacentreops.notification.service.NotificationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class NotificationController {
     }
 
     @PostMapping
-    public NotificationResponseDTO create(@RequestBody NotificationRequestDTO dto) {
+    public NotificationResponseDTO create(@Valid  @RequestBody NotificationRequestDTO dto) {
 
         return NotificationMapper.toDTO(
                 service.create(NotificationMapper.toEntity(dto))

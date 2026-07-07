@@ -20,20 +20,24 @@ public class CrossConnect {
     @Column(name = "cross_connect_id")
     private Long crossConnectId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long customerId;
 
     private Long rackId;
 
     private Long assetId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ConnectionType connectionType;
 
+    @Column(nullable = false)
     private String portA;
 
+    @Column(nullable = false)
     private String portZ;
 
+    @Column(nullable = false)
     private String bandwidth;
 
     private Long carrierId;
@@ -42,6 +46,7 @@ public class CrossConnect {
 
     private LocalDate provisionedDate;
 
+    @Column(nullable = false)
     private Double monthlyCost;
 
     @Enumerated(EnumType.STRING)

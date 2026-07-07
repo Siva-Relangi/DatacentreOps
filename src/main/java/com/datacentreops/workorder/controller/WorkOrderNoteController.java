@@ -4,6 +4,7 @@ import com.datacentreops.workorder.dto.*;
 import com.datacentreops.workorder.entity.WorkOrderNote;
 import com.datacentreops.workorder.mapper.WorkOrderNoteMapper;
 import com.datacentreops.workorder.service.WorkOrderNoteService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class WorkOrderNoteController {
 
     // CREATE
     @PostMapping
-    public WorkOrderNoteResponseDTO create(@RequestBody WorkOrderNoteRequestDTO dto) {
+    public WorkOrderNoteResponseDTO create(@Valid @RequestBody WorkOrderNoteRequestDTO dto) {
 
         return WorkOrderNoteMapper.toDTO(
                 service.create(WorkOrderNoteMapper.toEntity(dto))

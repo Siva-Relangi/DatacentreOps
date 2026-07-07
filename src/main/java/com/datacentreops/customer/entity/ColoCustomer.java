@@ -20,8 +20,10 @@ public class ColoCustomer {
     @Column(nullable = false, unique = true)
     private String companyName;
 
+    @Column(nullable = false)
     private String industrySegment;
 
+    @Column(nullable = false)
     private String contactPerson;
 
     private Long accountManagerId;

@@ -73,6 +73,14 @@ public class CapacitySnapshotService {
 
             throw new ResourceNotFoundException("DataHall", snapshot.getHallId());
         }
+
+        if(snapshot.getAllocatedRacks() > snapshot.getTotalRacks()){
+            throw new IllegalArgumentException("Allocated racks cannot exceed total racks");
+        }
+
+        if(snapshot.getAllocatedPowerKW() > snapshot.getTotalPowerKW()){
+            throw  new IllegalArgumentException("Allocated power cannot exceed total power");
+        }
     }
 
     //  SEARCH

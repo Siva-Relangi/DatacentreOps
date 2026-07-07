@@ -4,6 +4,7 @@ import com.datacentreops.capacity.dto.*;
 import com.datacentreops.capacity.entity.CapacitySnapshot;
 import com.datacentreops.capacity.mapper.CapacitySnapshotMapper;
 import com.datacentreops.capacity.service.CapacitySnapshotService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class CapacitySnapshotController {
     }
 
     @PostMapping
-    public CapacitySnapshotResponseDTO create(@RequestBody CapacitySnapshotRequestDTO dto) {
+    public CapacitySnapshotResponseDTO create(@Valid @RequestBody CapacitySnapshotRequestDTO dto) {
 
         return CapacitySnapshotMapper.toDTO(
                 service.create(CapacitySnapshotMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class CapacitySnapshotController {
     @PutMapping("/{id}")
     public CapacitySnapshotResponseDTO update(
             @PathVariable Long id,
-            @RequestBody CapacitySnapshotRequestDTO dto) {
+            @Valid @RequestBody CapacitySnapshotRequestDTO dto) {
 
         return CapacitySnapshotMapper.toDTO(
                 service.update(id, CapacitySnapshotMapper.toEntity(dto))

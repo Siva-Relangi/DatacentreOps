@@ -18,12 +18,13 @@ public class CarrierPresence {
     @Column(name = "carrier_id")
     private Long carrierId;
 
-    @NotBlank
+    @Column(nullable = false)
     private String carrierName;
 
     @Enumerated(EnumType.STRING)
     private ServiceType serviceType;
 
+    @Column(nullable = false)
     private Long dataCentreId;
 
     private String mmrCabinetId;

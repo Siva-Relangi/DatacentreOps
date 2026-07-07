@@ -18,13 +18,16 @@ public class ColoContract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long contractId;
 
+    @Column(nullable = false)
     private Long customerId;
 
     @Enumerated(EnumType.STRING)
     private ContractType contractType;
 
+    @Column(nullable = false)
     private Integer allocatedRacks;
 
+    @Column(nullable = false)
     private Double powerCommittedKW;
 
     private LocalDate contractStart;
@@ -33,6 +36,7 @@ public class ColoContract {
 
     private String slaTier;
 
+    @Column(nullable = false)
     private Double monthlyCost;
 
     @Enumerated(EnumType.STRING)

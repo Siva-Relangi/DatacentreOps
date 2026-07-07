@@ -4,6 +4,8 @@ package com.datacentreops.allocation.controller;
 import com.datacentreops.allocation.dto.AllocationRequestDTO;
 import com.datacentreops.allocation.dto.AllocationResponseDTO;
 import com.datacentreops.allocation.service.AllocationService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +19,7 @@ public class AllocationController {
     }
 
     @PostMapping("/racks")
-    public AllocationResponseDTO allocate(@RequestBody AllocationRequestDTO dto) {
+    public AllocationResponseDTO allocate(@Valid @RequestBody AllocationRequestDTO dto) {
         return allocationService.allocate(dto);
     }
 }

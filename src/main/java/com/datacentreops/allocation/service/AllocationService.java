@@ -16,6 +16,7 @@ import com.datacentreops.iam.entity.EntityType;
 import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.infrastructure.entity.Rack;
 import com.datacentreops.infrastructure.entity.RackStatus;
+import com.datacentreops.infrastructure.repository.DataHallRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -26,43 +27,50 @@ public class AllocationService {
     private final ColoContractRepository contractRepository;
     private final CapacityReservationRepository reservationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final DataHallRepository dataHallRepository;
 
     public AllocationService(
         RackRepository rackRepository,
         ColoContractRepository contractRepository,
         CapacityReservationRepository reservationRepository,
+        DataHallRepository dataHallRepository,
         AuditLogRepository auditLogRepository) {
 
         this.rackRepository = rackRepository;
         this.contractRepository = contractRepository;
         this.reservationRepository = reservationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.dataHallRepository = dataHallRepository;
     }
 
     @Transactional
     public AllocationResponseDTO allocate(AllocationRequestDTO request) {
+
         ColoContract contract = contractRepository.findById(request.getContractId())
         .orElseThrow(() -> new ResourceNotFoundException("Contract", request.getContractId()));
+
         if (contract.getStatus() != ContractStatus.ACTIVE) {
             throw new IllegalStateException("Only ACTIVE contracts can be allocated");
         }
+
+        if(!dataHallRepository.existsById(request.getHallId())){
+            throw new ResourceNotFoundException("DataHall", request.getHallId());
+        }
+
         Long customerId = contract.getCustomerId();
         Integer rackCount = contract.getAllocatedRacks();
         Double powerKW = contract.getPowerCommittedKW();
+
         List<Rack> availableRacks = rackRepository.findAll().stream().filter(r -> request.getHallId()
                                                 .equals(r.getHallId()) && r.getStatus() == RackStatus.AVAILABLE).limit(rackCount).toList();
         if (availableRacks.size() < rackCount) {
             throw new IllegalStateException("Not enough racks available. Requested: " + rackCount + ", Available: " + availableRacks.size());
         }
+
         for (Rack rack : availableRacks) {
             rack.setCustomerId(customerId);
             rack.setStatus(RackStatus.ALLOCATED);
-            if (rack.getUsedU() == null) {
-                rack.setUsedU(0);
-            }
-            if (rack.getAvailableU() == null && rack.getTotalU() != null) {
-                rack.setAvailableU(rack.getTotalU());
-            }
+
             rackRepository.save(rack);
         }
 
@@ -75,12 +83,13 @@ public class AllocationService {
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservationRepository.save(reservation);
         contract.setStatus(ContractStatus.ALLOCATED);
+        contractRepository.save(contract);
 
         AuditLog log = new AuditLog();
         log.setUserId(request.getUserId());     
         log.setAction(AuditAction.ALLOCATE);
         log.setEntityType(EntityType.RACK);
-        log.setRecordId(customerId);
+        log.setRecordId(contract.getContractId());
         auditLogRepository.save(log);
         return new AllocationResponseDTO(customerId,contract.getContractId(),rackCount, powerKW, "Racks allocated successfully");
     }

@@ -4,6 +4,7 @@ import com.datacentreops.environmental.dto.*;
 import com.datacentreops.environmental.entity.*;
 import com.datacentreops.environmental.mapper.EnvironmentalReadingMapper;
 import com.datacentreops.environmental.service.EnvironmentalReadingService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class EnvironmentalReadingController {
     }
 
     @PostMapping
-    public EnvironmentalReadingResponseDTO create(@RequestBody EnvironmentalReadingRequestDTO dto) {
+    public EnvironmentalReadingResponseDTO create(@Valid @RequestBody EnvironmentalReadingRequestDTO dto) {
 
         return EnvironmentalReadingMapper.toDTO(
                 service.create(EnvironmentalReadingMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class EnvironmentalReadingController {
     @PutMapping("/{id}")
     public EnvironmentalReadingResponseDTO update(
             @PathVariable Long id,
-            @RequestBody EnvironmentalReadingRequestDTO dto) {
+            @Valid @RequestBody EnvironmentalReadingRequestDTO dto) {
 
         return EnvironmentalReadingMapper.toDTO(
                 service.update(id, EnvironmentalReadingMapper.toEntity(dto))

@@ -21,16 +21,16 @@ public class CapacityReservation {
     @Column(name = "reservation_id")
     private Long reservationId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long customerId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long hallId;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Integer reservedU;
 
-    @PositiveOrZero
+    @Column(nullable = false)
     private Double reservedPowerKW;
 
     private LocalDate reservationDate = LocalDate.now();

@@ -20,7 +20,7 @@ public class CapacitySnapshot {
     @Column(name = "snapshot_id")
     private Long snapshotId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long hallId;
 
     private LocalDate snapshotDate = LocalDate.now();

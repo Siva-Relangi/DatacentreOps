@@ -6,6 +6,8 @@ import com.datacentreops.iam.entity.AuditAction;
 import com.datacentreops.iam.entity.AuditLog;
 import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.iam.repository.UserRepository;
+import com.datacentreops.infrastructure.entity.InstalledAsset;
+import com.datacentreops.infrastructure.entity.Rack;
 import com.datacentreops.infrastructure.repository.InstalledAssetRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
 import com.datacentreops.notification.entity.Notification;
@@ -107,20 +109,29 @@ public class WorkOrderService {
             throw new ResourceNotFoundException("Customer", w.getCustomerId());
         }
 
-        if (w.getRackId() != null &&
-                !rackRepository.existsById(w.getRackId())) {
-            throw new ResourceNotFoundException("Rack", w.getRackId());
+        if (w.getRackId() != null ) {
+
+            Rack rack = rackRepository.findById(w.getRackId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Rack", w.getRackId()));
+            if(rack.getCustomerId() != null && !rack.getCustomerId().equals(w.getCustomerId())){
+                throw new IllegalArgumentException("Rack is not allocated to this customer");
+            }
         }
 
         if (w.getAssetId() != null) {
-            assetRepository.findById(w.getAssetId())
+            InstalledAsset asset = assetRepository.findById(w.getAssetId())
                     .orElseThrow(() -> new ResourceNotFoundException("Asset", w.getAssetId()));
+
+            if(!asset.getRackId().equals(w.getRackId())){
+                throw new IllegalArgumentException("Asset does not belong to selected rack");
+            }
         }
 
         if (w.getRequestedById() != null &&
                 !userRepository.existsById(w.getRequestedById())) {
             throw new ResourceNotFoundException("User", w.getRequestedById());
         }
+
     }
 
     //  ASSIGN ENGINEER
@@ -136,12 +147,14 @@ public class WorkOrderService {
         notification.setUserId(engineerId);
         notification.setMessage("Work Order " + saved.getWorkOrderId() + " assigned to you");
         notificationRepository.save(notification);
+
         AuditLog audit = new AuditLog();
         audit.setUserId(engineerId);
         audit.setAction(AuditAction.ASSIGN);
         audit.setEntityType(EntityType.WORK_ORDER);
         audit.setRecordId(saved.getWorkOrderId());
         auditLogRepository.save(audit);
+
         return saved;
     }
  
@@ -159,12 +172,14 @@ public class WorkOrderService {
         notification.setUserId(saved.getRequestedById());
         notification.setMessage("Work Order " + saved.getWorkOrderId() + " changed to " + status);
         notificationRepository.save(notification);
+
         AuditLog audit = new AuditLog();
         audit.setUserId(saved.getRequestedById());
         audit.setAction(AuditAction.STATUS_CHANGE);
         audit.setEntityType(EntityType.WORK_ORDER);
         audit.setRecordId(saved.getWorkOrderId());
         auditLogRepository.save(audit);
+
         return saved;
     }
  

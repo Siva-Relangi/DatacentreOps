@@ -25,7 +25,7 @@ public class ColoCustomerService {
 
     //  CREATE
     public ColoCustomer create(ColoCustomer entity) {
-        validate(entity);
+
         if(repository.existsByCompanyName(entity.getCompanyName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Company already exists");
         }
@@ -47,6 +47,10 @@ public class ColoCustomerService {
     public ColoCustomer update(Long id, ColoCustomer entity) {
         ColoCustomer existing = findById(id);
 
+        if(!existing.getCompanyName().equals(entity.getCompanyName()) && repository.existsByCompanyName(entity.getCompanyName())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Company already exists");
+        }
+
         existing.setCompanyName(entity.getCompanyName());
         existing.setIndustrySegment(entity.getIndustrySegment());
         existing.setContactPerson(entity.getContactPerson());
@@ -54,7 +58,6 @@ public class ColoCustomerService {
         existing.setKycStatus(entity.getKycStatus());
         existing.setStatus(entity.getStatus());
 
-        validate(existing);
         return repository.save(existing);
     }
 
@@ -67,13 +70,6 @@ public class ColoCustomerService {
 
         findById(id);
         repository.deleteById(id);
-    }
-
-    //  VALIDATION
-    private void validate(ColoCustomer entity) {
-        if (entity.getCompanyName() == null || entity.getCompanyName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company name is required");
-        }
     }
 
     //  SEARCH

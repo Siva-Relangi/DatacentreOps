@@ -5,6 +5,7 @@ import com.datacentreops.capacity.entity.CapacityReservation;
 import com.datacentreops.capacity.entity.ReservationStatus;
 import com.datacentreops.capacity.mapper.CapacityReservationMapper;
 import com.datacentreops.capacity.service.CapacityReservationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class CapacityReservationController {
     }
 
     @PostMapping
-    public CapacityReservationResponseDTO create(@RequestBody CapacityReservationRequestDTO dto) {
+    public CapacityReservationResponseDTO create(@Valid @RequestBody CapacityReservationRequestDTO dto) {
 
         CapacityReservation saved = service.create(
                 CapacityReservationMapper.toEntity(dto)
@@ -47,7 +48,7 @@ public class CapacityReservationController {
     @PutMapping("/{id}")
     public CapacityReservationResponseDTO update(
             @PathVariable Long id,
-            @RequestBody CapacityReservationRequestDTO dto) {
+            @Valid @RequestBody CapacityReservationRequestDTO dto) {
 
         CapacityReservation updated = service.update(
                 id,

@@ -19,14 +19,15 @@ public class WorkOrderNote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long noteId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long workOrderId;
 
     private Long authorId;
 
-    @Column(length = 2000)
+    @Column(nullable = false, length = 2000)
     private String noteText;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NoteType noteType;
 

@@ -20,9 +20,10 @@ public class EnvironmentalIncident {
     @Column(name = "incident_id")
     private Long incidentId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long hallId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private IncidentType incidentType;
 

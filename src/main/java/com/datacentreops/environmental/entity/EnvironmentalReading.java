@@ -20,17 +20,20 @@ public class EnvironmentalReading {
     @Column(name = "reading_id")
     private Long readingId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long hallId;
 
+    @Column(nullable = false)
     private String sensorId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReadingType readingType;
 
-    @Column(name = "reading_value")
+    @Column(name = "reading_value", nullable = false)
     private Double value;
 
+    @Column(nullable = false)
     private String unit;
 
     private LocalDateTime readingTime = LocalDateTime.now();

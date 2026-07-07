@@ -11,8 +11,14 @@ public class CustomerRequestDTO {
 
     @NotBlank(message = "Company name is required")
     private String companyName;
+
+    @NotBlank(message = "Industry Segment is required")
     private String industrySegment;
+
+    @NotBlank(message = "Contract Person is required")
     private String contactPerson;
+
     private Long accountManagerId;
+
     private KycStatus kycStatus;
 }

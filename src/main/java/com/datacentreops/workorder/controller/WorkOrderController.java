@@ -6,6 +6,7 @@ import com.datacentreops.workorder.entity.WorkOrder;
 import com.datacentreops.workorder.entity.WorkOrderStatus;
 import com.datacentreops.workorder.mapper.WorkOrderMapper;
 import com.datacentreops.workorder.service.WorkOrderService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class WorkOrderController {
 
     //  CREATE
     @PostMapping
-    public WorkOrderResponseDTO create(@RequestBody WorkOrderRequestDTO dto) {
+    public WorkOrderResponseDTO create(@Valid @RequestBody WorkOrderRequestDTO dto) {
 
         WorkOrder entity = WorkOrderMapper.toEntity(dto);
         WorkOrder saved = service.create(entity);
@@ -53,7 +54,7 @@ public class WorkOrderController {
     @PutMapping("/{id}")
     public WorkOrderResponseDTO update(
             @PathVariable Long id,
-            @RequestBody WorkOrderRequestDTO dto) {
+            @Valid @RequestBody WorkOrderRequestDTO dto) {
 
         WorkOrder entity = WorkOrderMapper.toEntity(dto);
         WorkOrder updated = service.update(id, entity);

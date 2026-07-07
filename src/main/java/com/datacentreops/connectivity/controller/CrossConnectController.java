@@ -4,6 +4,7 @@ import com.datacentreops.connectivity.dto.*;
 import com.datacentreops.connectivity.entity.*;
 import com.datacentreops.connectivity.mapper.CrossConnectMapper;
 import com.datacentreops.connectivity.service.CrossConnectService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class CrossConnectController {
     }
 
     @PostMapping
-    public CrossConnectResponseDTO create(@RequestBody CrossConnectRequestDTO dto) {
+    public CrossConnectResponseDTO create(@Valid @RequestBody CrossConnectRequestDTO dto) {
 
         return CrossConnectMapper.toDTO(
                 service.create(CrossConnectMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class CrossConnectController {
     @PutMapping("/{id}")
     public CrossConnectResponseDTO update(
             @PathVariable Long id,
-            @RequestBody CrossConnectRequestDTO dto) {
+            @Valid @RequestBody CrossConnectRequestDTO dto) {
 
         return CrossConnectMapper.toDTO(
                 service.update(id, CrossConnectMapper.toEntity(dto))

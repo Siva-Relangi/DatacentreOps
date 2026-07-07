@@ -107,7 +107,6 @@ public class EnvironmentalReadingService {
         existing.setReadingType(s.getReadingType());
         existing.setValue(s.getValue());
         existing.setUnit(s.getUnit());
-        existing.setStatus(s.getStatus());
 
         validate(existing);
         return repository.save(existing);

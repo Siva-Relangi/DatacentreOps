@@ -19,25 +19,30 @@ public class WorkOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long workOrderId;
 
-    @NotNull
+    @Column(nullable = false)
     private Long customerId;
 
     private Long rackId;
+
     private Long assetId;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private WorkOrderType requestType;
 
-    @Column(length = 2000)
+    @Column(nullable = false, length = 2000)
     private String description;
 
     @Enumerated(EnumType.STRING)
     private WorkOrderPriority priority = WorkOrderPriority.STANDARD;
 
+    @Column(nullable = false)
     private Long requestedById;
+
     private Long assignedEngineerId;
 
     private LocalDateTime requestedDate = LocalDateTime.now();
+
     private LocalDateTime completionDate;
 
     @Enumerated(EnumType.STRING)

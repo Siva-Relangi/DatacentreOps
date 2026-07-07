@@ -4,6 +4,7 @@ import com.datacentreops.connectivity.dto.*;
 import com.datacentreops.connectivity.entity.*;
 import com.datacentreops.connectivity.mapper.CarrierPresenceMapper;
 import com.datacentreops.connectivity.service.CarrierPresenceService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class CarrierPresenceController {
     }
 
     @PostMapping
-    public CarrierPresenceResponseDTO create(@RequestBody CarrierPresenceRequestDTO dto) {
+    public CarrierPresenceResponseDTO create(@Valid @RequestBody CarrierPresenceRequestDTO dto) {
 
         return CarrierPresenceMapper.toDTO(
                 service.create(CarrierPresenceMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class CarrierPresenceController {
     @PutMapping("/{id}")
     public CarrierPresenceResponseDTO update(
             @PathVariable Long id,
-            @RequestBody CarrierPresenceRequestDTO dto) {
+            @Valid @RequestBody CarrierPresenceRequestDTO dto) {
 
         return CarrierPresenceMapper.toDTO(
                 service.update(id, CarrierPresenceMapper.toEntity(dto))

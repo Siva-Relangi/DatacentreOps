@@ -1,6 +1,7 @@
 package com.datacentreops.notification.repository;
 
 import com.datacentreops.notification.entity.Notification;
+import com.datacentreops.notification.entity.NotificationCategory;
 import com.datacentreops.notification.entity.NotificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     List<Notification> findByUserIdAndStatus(Long userId, NotificationStatus status);
 
-    List<Notification> findByCategory(Object category);
+    List<Notification> findByCategory(NotificationCategory category);
 }
