@@ -116,7 +116,6 @@ public class InstalledAssetService {
         existing.setUHeight(asset.getUHeight());
         existing.setPowerDrawW(asset.getPowerDrawW());
         existing.setInstalledDate(asset.getInstalledDate());
-        existing.setStatus(asset.getStatus());
         validate(existing);
         Rack rack = rackRepository.findById(existing.getRackId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rack", existing.getRackId()));
@@ -141,6 +140,22 @@ public class InstalledAssetService {
         if (!oldRackId.equals(existing.getRackId())) {
             recalculateRack(existing.getRackId());
         }
+        return saved;
+    }
+
+    public InstalledAsset changeStatus(Long id, AssetStatus status){
+        InstalledAsset asset = findById(id);
+        asset.setStatus(status);
+
+        InstalledAsset saved = repository.save(asset);
+
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.STATUS_CHANGE);
+        log.setEntityType(EntityType.ASSET);
+        log.setRecordId(saved.getAssetId());
+
+        auditLogRepository.save(log);
+
         return saved;
     }
 

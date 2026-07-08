@@ -51,6 +51,11 @@ public class RackController {
         );
     }
 
+    @PatchMapping("/{id}/status")
+    public RackResponseDTO changeStatus(@PathVariable Long id, @RequestParam RackStatus status){
+        return RackMapper.toDTO(service.changeStatus(id, status));
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);

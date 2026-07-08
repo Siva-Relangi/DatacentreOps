@@ -113,6 +113,23 @@ public class RackService {
         return repository.save(existing);
     }
 
+    // Status Change
+    public Rack changeStatus(Long id, RackStatus status){
+        Rack rack = findById(id);
+        rack.setStatus(status);
+
+        Rack saved = repository.save(rack);
+
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.STATUS_CHANGE);
+        log.setEntityType(EntityType.RACK);
+        log.setRecordId(saved.getRackId());
+
+        auditLogRepository.save(log);
+
+        return saved;
+    }
+
     //  DELETE (BUSINESS RULE )
     public void delete(Long id) {
 

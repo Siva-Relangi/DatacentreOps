@@ -51,6 +51,11 @@ public class InstalledAssetController {
         );
     }
 
+    @PatchMapping("/{id}/status")
+    public InstalledAssetResponseDTO changeStatus(@PathVariable Long id, @RequestParam AssetStatus status){
+        return InstalledAssetMapper.toDTO(service.changeStatus(id, status));
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
