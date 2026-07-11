@@ -5,27 +5,6 @@ import com.datacentreops.capacity.entity.CapacitySnapshot;
 
 public class CapacitySnapshotMapper {
 
-    public static CapacitySnapshot toEntity(CapacitySnapshotRequestDTO dto) {
-
-        CapacitySnapshot s = new CapacitySnapshot();
-
-        s.setHallId(dto.getHallId());
-
-        if (dto.getSnapshotDate() != null) {
-            s.setSnapshotDate(dto.getSnapshotDate());
-        }
-
-        s.setTotalRacks(dto.getTotalRacks());
-        s.setAllocatedRacks(dto.getAllocatedRacks());
-        s.setTotalPowerKW(dto.getTotalPowerKW());
-        s.setAllocatedPowerKW(dto.getAllocatedPowerKW());
-        s.setCoolingUsagePercent(dto.getCoolingUsagePercent());
-        s.setSpaceUtilisationPercent(dto.getSpaceUtilisationPercent());
-        s.setPowerUtilisationPercent(dto.getPowerUtilisationPercent());
-
-        return s;
-    }
-
     public static CapacitySnapshotResponseDTO toDTO(CapacitySnapshot entity) {
 
         CapacitySnapshotResponseDTO dto = new CapacitySnapshotResponseDTO();

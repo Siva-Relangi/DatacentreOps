@@ -20,16 +20,6 @@ public class CapacityReservationController {
         this.service = service;
     }
 
-    @PostMapping
-    public CapacityReservationResponseDTO create(@Valid @RequestBody CapacityReservationRequestDTO dto) {
-
-        CapacityReservation saved = service.create(
-                CapacityReservationMapper.toEntity(dto)
-        );
-
-        return CapacityReservationMapper.toDTO(saved);
-    }
-
     @GetMapping
     public List<CapacityReservationResponseDTO> getAll() {
 
@@ -42,20 +32,9 @@ public class CapacityReservationController {
     @GetMapping("/{id}")
     public CapacityReservationResponseDTO getById(@PathVariable Long id) {
 
-        return CapacityReservationMapper.toDTO(service.findById(id));
-    }
-
-    @PutMapping("/{id}")
-    public CapacityReservationResponseDTO update(
-            @PathVariable Long id,
-            @Valid @RequestBody CapacityReservationRequestDTO dto) {
-
-        CapacityReservation updated = service.update(
-                id,
-                CapacityReservationMapper.toEntity(dto)
+        return CapacityReservationMapper.toDTO(
+                service.findById(id)
         );
-
-        return CapacityReservationMapper.toDTO(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -73,11 +52,14 @@ public class CapacityReservationController {
 
         if (customerId != null) {
             list = service.findByCustomer(customerId);
-        } else if (hallId != null) {
+        }
+        else if (hallId != null) {
             list = service.findByHall(hallId);
-        } else if (status != null) {
+        }
+        else if (status != null) {
             list = service.findByStatus(status);
-        } else {
+        }
+        else {
             list = service.findAll();
         }
 

@@ -1,5 +1,8 @@
 package com.datacentreops.customer.service;
 
+import com.datacentreops.capacity.entity.CapacityReservation;
+import com.datacentreops.capacity.entity.ReservationStatus;
+import com.datacentreops.capacity.repository.CapacityReservationRepository;
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.customer.entity.ColoContract;
 import com.datacentreops.customer.entity.ColoCustomer;
@@ -20,13 +23,16 @@ public class ColoContractService {
     private final ColoContractRepository repository;
     private final ColoCustomerRepository customerRepository;
     private final AuditLogRepository auditLogRepository;
+    private final CapacityReservationRepository reservationRepository;
 
     public ColoContractService(ColoContractRepository repository,
                                ColoCustomerRepository customerRepository,
-                               AuditLogRepository auditLogRepository) {
+                               AuditLogRepository auditLogRepository,
+                               CapacityReservationRepository reservationRepository) {
         this.repository = repository;
         this.customerRepository = customerRepository;
         this.auditLogRepository = auditLogRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     //  CREATE
@@ -42,7 +48,7 @@ public class ColoContractService {
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.CREATE);
         log.setEntityType(EntityType.CUSTOMER);
-        log.setRecordId(saved.getCustomerId());
+        log.setRecordId(saved.getContractId());
         auditLogRepository.save(log);
 
         return saved;
@@ -91,14 +97,24 @@ public class ColoContractService {
 
     //  DELETE
     public void delete(Long id) {
-        findById(id);
+
+        ColoContract contract = findById(id);
+
+        List<CapacityReservation> reservations =
+                reservationRepository.findByCustomerId(contract.getCustomerId());
+
+        for (CapacityReservation reservation : reservations) {
+            reservation.setStatus(ReservationStatus.CANCELLED);
+            reservationRepository.save(reservation);
+        }
+
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.DELETE);
         log.setEntityType(EntityType.CUSTOMER);
-        log.setRecordId(id);
+        log.setRecordId(contract.getContractId());
         auditLogRepository.save(log);
 
-        repository.deleteById(id);
+        repository.delete(contract);
     }
 
     public List<ColoContract> findByCustomer(Long customerId) {

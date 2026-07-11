@@ -1,94 +1,130 @@
 package com.datacentreops.capacity.service;
 
+import com.datacentreops.capacity.dto.CapacitySnapshotResponseDTO;
 import com.datacentreops.capacity.entity.CapacitySnapshot;
 import com.datacentreops.capacity.entity.SnapshotStatus;
-import com.datacentreops.capacity.repository.CapacitySnapshotRepository;
 import com.datacentreops.common.ResourceNotFoundException;
+import com.datacentreops.infrastructure.entity.DataHall;
+import com.datacentreops.infrastructure.entity.Rack;
+import com.datacentreops.infrastructure.entity.RackStatus;
 import com.datacentreops.infrastructure.repository.DataHallRepository;
+import com.datacentreops.infrastructure.repository.RackRepository;
+import com.datacentreops.capacity.repository.CapacitySnapshotRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class CapacitySnapshotService {
 
-    private final CapacitySnapshotRepository repository;
-    private final DataHallRepository dataHallRepository;
+    private final DataHallRepository hallRepository;
+    private final RackRepository rackRepository;
+    private final CapacitySnapshotRepository snapshotRepository;
 
-    public CapacitySnapshotService(CapacitySnapshotRepository repository,
-                                   DataHallRepository dataHallRepository) {
-        this.repository = repository;
-        this.dataHallRepository = dataHallRepository;
+    public CapacitySnapshotService(DataHallRepository hallRepository,
+                                   RackRepository rackRepository,
+                                   CapacitySnapshotRepository snapshotRepository) {
+        this.hallRepository = hallRepository;
+        this.rackRepository = rackRepository;
+        this.snapshotRepository = snapshotRepository;
     }
 
-    //  CREATE
-    public CapacitySnapshot create(CapacitySnapshot snapshot) {
+    public List<CapacitySnapshotResponseDTO> getAllSnapshots() {
 
-        validate(snapshot);
-        return repository.save(snapshot);
+        return hallRepository.findAll()
+                .stream()
+                .map(hall -> buildSnapshot(hall.getHallId()))
+                .toList();
     }
 
-    //  GET ALL
-    public List<CapacitySnapshot> findAll() {
-        return repository.findAll();
-    }
+    public CapacitySnapshotResponseDTO getSnapshotByHall(Long hallId) {
 
-    //  GET BY ID
-    public CapacitySnapshot findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("CapacitySnapshot", id));
-    }
-
-    //  UPDATE
-    public CapacitySnapshot update(Long id, CapacitySnapshot s) {
-
-        CapacitySnapshot existing = findById(id);
-
-        existing.setHallId(s.getHallId());
-        existing.setSnapshotDate(s.getSnapshotDate());
-        existing.setTotalRacks(s.getTotalRacks());
-        existing.setAllocatedRacks(s.getAllocatedRacks());
-        existing.setTotalPowerKW(s.getTotalPowerKW());
-        existing.setAllocatedPowerKW(s.getAllocatedPowerKW());
-        existing.setCoolingUsagePercent(s.getCoolingUsagePercent());
-        existing.setSpaceUtilisationPercent(s.getSpaceUtilisationPercent());
-        existing.setPowerUtilisationPercent(s.getPowerUtilisationPercent());
-        existing.setStatus(s.getStatus());
-
-        validate(existing);
-        return repository.save(existing);
-    }
-
-    //  DELETE
-    public void delete(Long id) {
-        findById(id);
-        repository.deleteById(id);
-    }
-
-    //  VALIDATION
-    private void validate(CapacitySnapshot snapshot) {
-
-        if (snapshot.getHallId() == null ||
-                !dataHallRepository.existsById(snapshot.getHallId())) {
-
-            throw new ResourceNotFoundException("DataHall", snapshot.getHallId());
+        if (!hallRepository.existsById(hallId)) {
+            throw new ResourceNotFoundException("DataHall", hallId);
         }
 
-        if(snapshot.getAllocatedRacks() > snapshot.getTotalRacks()){
-            throw new IllegalArgumentException("Allocated racks cannot exceed total racks");
-        }
-
-        if(snapshot.getAllocatedPowerKW() > snapshot.getTotalPowerKW()){
-            throw  new IllegalArgumentException("Allocated power cannot exceed total power");
-        }
+        return buildSnapshot(hallId);
     }
 
-    //  SEARCH
-    public List<CapacitySnapshot> findByHall(Long hallId) {
-        return repository.findByHallId(hallId);
-    }
+    private CapacitySnapshotResponseDTO buildSnapshot(Long hallId) {
 
-    public List<CapacitySnapshot> findCurrentByHall(Long hallId) {
-        return repository.findByHallIdAndStatus(hallId, SnapshotStatus.CURRENT);
+        DataHall hall = hallRepository.findById(hallId)
+                .orElseThrow(() -> new ResourceNotFoundException("DataHall", hallId));
+
+        List<Rack> racks = rackRepository.findByHallId(hallId);
+
+        int totalRacks = racks.size();
+
+        int allocatedRacks = (int) racks.stream()
+                .filter(r -> r.getStatus() == RackStatus.ALLOCATED)
+                .count();
+
+        double allocatedPower = racks.stream()
+                .mapToDouble(r -> r.getAllocatedPowerKW() == null ? 0 : r.getAllocatedPowerKW())
+                .sum();
+
+        double totalPower = hall.getTotalPowerKW();
+
+        double powerUtilisation = totalPower == 0
+                ? 0
+                : (allocatedPower / totalPower) * 100;
+
+        int totalU = racks.stream()
+                .mapToInt(r -> r.getTotalU() == null ? 0 : r.getTotalU())
+                .sum();
+
+        int usedU = racks.stream()
+                .mapToInt(r -> r.getUsedU() == null ? 0 : r.getUsedU())
+                .sum();
+
+        double spaceUtilisation = totalU == 0
+                ? 0
+                : ((double) usedU / totalU) * 100;
+
+        double coolingUsed = allocatedPower;
+
+        double coolingUtilisation = hall.getCoolingCapacityKW() == 0
+                ? 0
+                : (coolingUsed / hall.getCoolingCapacityKW()) * 100;
+
+
+        CapacitySnapshot snapshot = snapshotRepository.findTopByHallIdAndStatusOrderBySnapshotDateDesc(hallId, SnapshotStatus.CURRENT);
+
+        if (snapshot == null) {
+            snapshot = new CapacitySnapshot();
+            snapshot.setHallId(hallId);
+            snapshot.setStatus(SnapshotStatus.CURRENT);
+        }
+
+        snapshot.setSnapshotDate(LocalDate.now());
+        snapshot.setTotalRacks(totalRacks);
+        snapshot.setAllocatedRacks(allocatedRacks);
+        snapshot.setTotalPowerKW(totalPower);
+        snapshot.setAllocatedPowerKW(allocatedPower);
+        snapshot.setCoolingUsagePercent(coolingUtilisation);
+        snapshot.setSpaceUtilisationPercent(spaceUtilisation);
+        snapshot.setPowerUtilisationPercent(powerUtilisation);
+
+        snapshotRepository.save(snapshot);
+
+        CapacitySnapshotResponseDTO dto = new CapacitySnapshotResponseDTO();
+
+        dto.setHallId(hallId);
+        dto.setSnapshotDate(LocalDate.now());
+
+        dto.setTotalRacks(totalRacks);
+        dto.setAllocatedRacks(allocatedRacks);
+
+        dto.setTotalPowerKW(totalPower);
+        dto.setAllocatedPowerKW(allocatedPower);
+
+        dto.setSnapshotId(snapshot.getSnapshotId());
+        dto.setStatus(snapshot.getStatus());
+        dto.setPowerUtilisationPercent(powerUtilisation);
+        dto.setSpaceUtilisationPercent(spaceUtilisation);
+        dto.setCoolingUsagePercent(coolingUtilisation);
+
+        return dto;
     }
 }

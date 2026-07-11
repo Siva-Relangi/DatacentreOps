@@ -15,90 +15,37 @@ import java.util.List;
 public class CapacityReservationService {
 
     private final CapacityReservationRepository repository;
-    private final DataHallRepository dataHallRepository;
-    private final ColoCustomerRepository customerRepository;
 
     public CapacityReservationService(
-            CapacityReservationRepository repository,
-            DataHallRepository dataHallRepository,
-            ColoCustomerRepository customerRepository) {
+            CapacityReservationRepository repository) {
 
         this.repository = repository;
-        this.dataHallRepository = dataHallRepository;
-        this.customerRepository = customerRepository;
     }
 
-    //  CREATE
-    public CapacityReservation create(CapacityReservation r) {
-
-        validate(r);
-        return repository.save(r);
-    }
-
-    //  GET ALL
+    // GET ALL
     public List<CapacityReservation> findAll() {
         return repository.findAll();
     }
 
-    //  GET BY ID
+    // GET BY ID
     public CapacityReservation findById(Long id) {
+
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("CapacityReservation", id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "CapacityReservation", id));
     }
 
-    //  UPDATE
-    public CapacityReservation update(Long id, CapacityReservation r) {
-
-        CapacityReservation existing = findById(id);
-
-        existing.setCustomerId(r.getCustomerId());
-        existing.setHallId(r.getHallId());
-        existing.setReservedU(r.getReservedU());
-        existing.setReservedPowerKW(r.getReservedPowerKW());
-        existing.setReservationDate(r.getReservationDate());
-        existing.setExpiryDate(r.getExpiryDate());
-        existing.setStatus(r.getStatus());
-
-        validate(existing);
-        return repository.save(existing);
-    }
-
-    //  DELETE
+    // DELETE (Admin Operation)
     public void delete(Long id) {
-        findById(id);
-        repository.deleteById(id);
+
+        CapacityReservation reservation = findById(id);
+
+        repository.delete(reservation);
     }
 
-    //  VALIDATION (IMPORTANT)
-    private void validate(CapacityReservation r) {
+    // SEARCH
 
-        if (!customerRepository.existsById(r.getCustomerId())) {
-            throw new ResourceNotFoundException("ColoCustomer", r.getCustomerId());
-        }
-
-        DataHall hall = dataHallRepository.findById(r.getHallId())
-                .orElseThrow(() -> new ResourceNotFoundException("DataHall", r.getHallId()));
-
-        if (r.getReservationDate() != null && r.getExpiryDate() != null &&
-                r.getExpiryDate().isBefore(r.getReservationDate())) {
-            throw new IllegalArgumentException("expiryDate cannot be before reservationDate");
-        }
-
-        if (hall.getTotalPowerKW() != null && r.getReservedPowerKW() != null) {
-
-            double reserved = repository.findByHallId(r.getHallId()).stream()
-                    .filter(x -> x.getReservedPowerKW() != null)
-                    .mapToDouble(CapacityReservation::getReservedPowerKW)
-                    .sum();
-
-            if (reserved + r.getReservedPowerKW() > hall.getTotalPowerKW()) {
-                throw new IllegalArgumentException(
-                        "Power capacity exceeded for hall " + r.getHallId());
-            }
-        }
-    }
-
-    //  SEARCH
     public List<CapacityReservation> findByCustomer(Long customerId) {
         return repository.findByCustomerId(customerId);
     }
