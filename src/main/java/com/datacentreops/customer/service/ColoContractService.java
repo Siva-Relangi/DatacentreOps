@@ -2,9 +2,14 @@ package com.datacentreops.customer.service;
 
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.customer.entity.ColoContract;
+import com.datacentreops.customer.entity.ColoCustomer;
 import com.datacentreops.customer.entity.ContractStatus;
 import com.datacentreops.customer.repository.ColoContractRepository;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.entity.EntityType;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +19,14 @@ public class ColoContractService {
 
     private final ColoContractRepository repository;
     private final ColoCustomerRepository customerRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public ColoContractService(ColoContractRepository repository,
-                               ColoCustomerRepository customerRepository) {
+                               ColoCustomerRepository customerRepository,
+                               AuditLogRepository auditLogRepository) {
         this.repository = repository;
         this.customerRepository = customerRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
@@ -28,7 +36,16 @@ public class ColoContractService {
             throw new ResourceNotFoundException("Customer", entity.getCustomerId());
         }
         validate(entity);
-        return repository.save(entity);
+
+        // AuditLog
+        ColoContract saved = repository.save(entity);
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.CREATE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(saved.getCustomerId());
+        auditLogRepository.save(log);
+
+        return saved;
     }
 
     private void validate(ColoContract entity) {
@@ -63,12 +80,24 @@ public class ColoContractService {
 
         validate(existing);
 
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.UPDATE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(entity.getContractId());
+        auditLogRepository.save(log);
+
         return repository.save(existing);
     }
 
     //  DELETE
     public void delete(Long id) {
         findById(id);
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.DELETE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(id);
+        auditLogRepository.save(log);
+
         repository.deleteById(id);
     }
 

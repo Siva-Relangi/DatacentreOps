@@ -116,6 +116,10 @@ public class RackService {
     // Status Change
     public Rack changeStatus(Long id, RackStatus status){
         Rack rack = findById(id);
+
+        if(rack.getCustomerId() != null){
+            throw new IllegalArgumentException("Cannot change status of an allocated rack");
+        }
         rack.setStatus(status);
 
         Rack saved = repository.save(rack);

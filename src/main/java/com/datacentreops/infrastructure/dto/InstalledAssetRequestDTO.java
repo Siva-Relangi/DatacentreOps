@@ -1,5 +1,6 @@
 package com.datacentreops.infrastructure.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
@@ -27,10 +28,11 @@ public class InstalledAssetRequestDTO {
     @NotBlank(message = "Serial Number is required")
     private String serialNumber;
 
-    private Integer uPosition;
+    private Integer unitPosition;
 
     @Positive(message = "U Height must be greater than 0")
-    private Integer uHeight;
+
+    private Integer unitHeight;
 
     @Positive(message = "Power Draw must be greater than 0")
     private Double powerDrawW;

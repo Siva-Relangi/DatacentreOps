@@ -4,6 +4,7 @@ import com.datacentreops.infrastructure.dto.*;
 import com.datacentreops.infrastructure.entity.*;
 import com.datacentreops.infrastructure.mapper.RackMapper;
 import com.datacentreops.infrastructure.service.RackService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class RackController {
     }
 
     @PostMapping
-    public RackResponseDTO create(@RequestBody RackRequestDTO dto) {
+    public RackResponseDTO create(@Valid @RequestBody RackRequestDTO dto) {
 
         return RackMapper.toDTO(
                 service.create(RackMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class RackController {
     @PutMapping("/{id}")
     public RackResponseDTO update(
             @PathVariable Long id,
-            @RequestBody RackRequestDTO dto) {
+            @Valid @RequestBody RackRequestDTO dto) {
 
         return RackMapper.toDTO(
                 service.update(id, RackMapper.toEntity(dto))

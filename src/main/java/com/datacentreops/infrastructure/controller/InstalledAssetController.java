@@ -4,6 +4,7 @@ import com.datacentreops.infrastructure.dto.*;
 import com.datacentreops.infrastructure.entity.*;
 import com.datacentreops.infrastructure.mapper.InstalledAssetMapper;
 import com.datacentreops.infrastructure.service.InstalledAssetService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class InstalledAssetController {
     }
 
     @PostMapping
-    public InstalledAssetResponseDTO create(@RequestBody InstalledAssetRequestDTO dto) {
+    public InstalledAssetResponseDTO create(@Valid @RequestBody InstalledAssetRequestDTO dto) {
 
         return InstalledAssetMapper.toDTO(
                 service.create(InstalledAssetMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class InstalledAssetController {
     @PutMapping("/{id}")
     public InstalledAssetResponseDTO update(
             @PathVariable Long id,
-            @RequestBody InstalledAssetRequestDTO dto) {
+            @Valid @RequestBody InstalledAssetRequestDTO dto) {
 
         return InstalledAssetMapper.toDTO(
                 service.update(id, InstalledAssetMapper.toEntity(dto))

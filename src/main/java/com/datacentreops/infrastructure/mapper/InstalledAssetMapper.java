@@ -15,8 +15,8 @@ public class InstalledAssetMapper {
         a.setMake(dto.getMake());
         a.setModel(dto.getModel());
         a.setSerialNumber(dto.getSerialNumber());
-        a.setUPosition(dto.getUPosition());
-        a.setUHeight(dto.getUHeight());
+        a.setUnitPosition(dto.getUnitPosition());
+        a.setUnitHeight(dto.getUnitHeight());
         a.setPowerDrawW(dto.getPowerDrawW());
         a.setInstalledDate(dto.getInstalledDate());
 
@@ -34,8 +34,8 @@ public class InstalledAssetMapper {
         dto.setMake(entity.getMake());
         dto.setModel(entity.getModel());
         dto.setSerialNumber(entity.getSerialNumber());
-        dto.setUPosition(entity.getUPosition());
-        dto.setUHeight(entity.getUHeight());
+        dto.setUnitPosition(entity.getUnitPosition());
+        dto.setUnitHeight(entity.getUnitHeight());
         dto.setPowerDrawW(entity.getPowerDrawW());
         dto.setInstalledDate(entity.getInstalledDate());
         dto.setStatus(entity.getStatus());

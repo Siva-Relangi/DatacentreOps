@@ -60,11 +60,11 @@ public class InstalledAssetService {
         List<InstalledAsset> assets = repository.findByRackId(rack.getRackId());
 
         int usedU = assets.stream()
-                .filter(a -> a.getUHeight() != null)
-                .mapToInt(InstalledAsset::getUHeight)
+                .filter(a -> a.getUnitHeight() != null)
+                .mapToInt(InstalledAsset::getUnitHeight)
                 .sum();
 
-        int assetU = asset.getUHeight() == null ? 0 : asset.getUHeight();
+        int assetU = asset.getUnitHeight() == null ? 0 : asset.getUnitHeight();
 
         if (usedU + assetU > rack.getTotalU()) {
             throw new IllegalArgumentException("Not enough rack U space");
@@ -102,7 +102,7 @@ public class InstalledAssetService {
     public InstalledAsset update(Long id, InstalledAsset asset) {
         InstalledAsset existing = findById(id);
 
-        Integer oldUHeight = existing.getUHeight();
+        Integer oldUHeight = existing.getUnitHeight();
         Double oldPowerDraw = existing.getPowerDrawW();
         Long oldRackId = existing.getRackId();
 
@@ -112,8 +112,8 @@ public class InstalledAssetService {
         existing.setMake(asset.getMake());
         existing.setModel(asset.getModel());
         existing.setSerialNumber(asset.getSerialNumber());
-        existing.setUPosition(asset.getUPosition());
-        existing.setUHeight(asset.getUHeight());
+        existing.setUnitPosition(asset.getUnitPosition());
+        existing.setUnitHeight(asset.getUnitHeight());
         existing.setPowerDrawW(asset.getPowerDrawW());
         existing.setInstalledDate(asset.getInstalledDate());
         validate(existing);
@@ -165,13 +165,13 @@ public class InstalledAssetService {
         List<InstalledAsset> assets = repository.findByRackId(rack.getRackId());
 
         int usedU = assets.stream()
-                .filter(a -> a.getUHeight() != null)
-                .mapToInt(InstalledAsset::getUHeight)
+                .filter(a -> a.getUnitHeight() != null)
+                .mapToInt(InstalledAsset::getUnitHeight)
                 .sum();
 
         usedU -= oldUHeight;
 
-        usedU += newAsset.getUHeight();
+        usedU += newAsset.getUnitHeight();
 
         if (usedU > rack.getTotalU()) {
             throw new IllegalArgumentException("Not enough rack U space");
@@ -195,8 +195,8 @@ public class InstalledAssetService {
         Rack rack = rackRepository.findById(rackId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rack", rackId));
         List<InstalledAsset> assets = repository.findByRackId(rackId);
-        int usedU = assets.stream().filter(a -> a.getUHeight() != null)
-                    .mapToInt(InstalledAsset::getUHeight).sum();
+        int usedU = assets.stream().filter(a -> a.getUnitHeight() != null)
+                    .mapToInt(InstalledAsset::getUnitHeight).sum();
         double allocatedPower = assets.stream().filter(a -> a.getPowerDrawW() != null)
                                 .mapToDouble(a -> a.getPowerDrawW() / 1000.0).sum();
 

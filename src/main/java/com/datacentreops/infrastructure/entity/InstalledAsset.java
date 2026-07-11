@@ -1,5 +1,6 @@
 package com.datacentreops.infrastructure.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,10 +35,10 @@ public class InstalledAsset {
     @Column(nullable = false, unique = true)
     private String serialNumber;
 
-    private Integer uPosition;
+    private Integer unitPosition;
 
     @Column(nullable = false)
-    private Integer uHeight;
+    private Integer unitHeight;
 
     @Column(nullable = false)
     private Double powerDrawW;

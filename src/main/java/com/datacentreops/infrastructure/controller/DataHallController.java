@@ -4,6 +4,7 @@ import com.datacentreops.infrastructure.dto.*;
 import com.datacentreops.infrastructure.entity.*;
 import com.datacentreops.infrastructure.mapper.DataHallMapper;
 import com.datacentreops.infrastructure.service.DataHallService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class DataHallController {
     }
 
     @PostMapping
-    public DataHallResponseDTO create(@RequestBody DataHallRequestDTO dto) {
+    public DataHallResponseDTO create(@Valid @RequestBody DataHallRequestDTO dto) {
 
         return DataHallMapper.toDTO(
                 service.create(DataHallMapper.toEntity(dto))
@@ -44,7 +45,7 @@ public class DataHallController {
     @PutMapping("/{id}")
     public DataHallResponseDTO update(
             @PathVariable Long id,
-            @RequestBody DataHallRequestDTO dto) {
+            @Valid @RequestBody DataHallRequestDTO dto) {
 
         return DataHallMapper.toDTO(
                 service.update(id, DataHallMapper.toEntity(dto))

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class AuditLogResponseDTO {
 
     private Long auditId;
-    private Long userId;
     private AuditAction action;
     private EntityType entityType;
     private Long recordId;

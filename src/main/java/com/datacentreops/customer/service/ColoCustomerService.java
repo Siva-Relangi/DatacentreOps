@@ -5,6 +5,10 @@ import com.datacentreops.customer.entity.ColoCustomer;
 import com.datacentreops.customer.entity.CustomerStatus;
 import com.datacentreops.customer.repository.ColoContractRepository;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.entity.EntityType;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,11 +20,14 @@ public class ColoCustomerService {
 
     private final ColoCustomerRepository repository;
     private final ColoContractRepository contractRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public ColoCustomerService(ColoCustomerRepository repository,
-                               ColoContractRepository contractRepository) {
+                               ColoContractRepository contractRepository,
+                               AuditLogRepository auditLogRepository) {
         this.repository = repository;
         this.contractRepository = contractRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
@@ -29,7 +36,16 @@ public class ColoCustomerService {
         if(repository.existsByCompanyName(entity.getCompanyName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Company already exists");
         }
-        return repository.save(entity);
+
+        // AuditLog
+        ColoCustomer saved = repository.save(entity);
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.CREATE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(saved.getCustomerId());
+        auditLogRepository.save(log);
+
+        return saved;
     }
 
     //  GET ALL
@@ -58,6 +74,12 @@ public class ColoCustomerService {
         existing.setKycStatus(entity.getKycStatus());
         existing.setStatus(entity.getStatus());
 
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.UPDATE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(entity.getCustomerId());
+        auditLogRepository.save(log);
+
         return repository.save(existing);
     }
 
@@ -69,6 +91,12 @@ public class ColoCustomerService {
         }
 
         findById(id);
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.DELETE);
+        log.setEntityType(EntityType.CUSTOMER);
+        log.setRecordId(id);
+        auditLogRepository.save(log);
+
         repository.deleteById(id);
     }
 
