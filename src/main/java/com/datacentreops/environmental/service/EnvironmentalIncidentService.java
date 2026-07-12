@@ -14,24 +14,11 @@ import java.util.List;
 public class EnvironmentalIncidentService {
 
     private final EnvironmentalIncidentRepository repository;
-    private final DataHallRepository dataHallRepository;
-    private final UserRepository userRepository;
 
     public EnvironmentalIncidentService(
-            EnvironmentalIncidentRepository repository,
-            DataHallRepository dataHallRepository,
-            UserRepository userRepository) {
+            EnvironmentalIncidentRepository repository) {
 
         this.repository = repository;
-        this.dataHallRepository = dataHallRepository;
-        this.userRepository = userRepository;
-    }
-
-    //  CREATE
-    public EnvironmentalIncident create(EnvironmentalIncident entity) {
-
-        validate(entity);
-        return repository.save(entity);
     }
 
     //  GET ALL
@@ -45,44 +32,10 @@ public class EnvironmentalIncidentService {
                 .orElseThrow(() -> new ResourceNotFoundException("EnvironmentalIncident", id));
     }
 
-    //  UPDATE
-    public EnvironmentalIncident update(Long id, EnvironmentalIncident s) {
-
-        EnvironmentalIncident existing = findById(id);
-
-        existing.setHallId(s.getHallId());
-        existing.setIncidentType(s.getIncidentType());
-        existing.setAssignedEngineerId(s.getAssignedEngineerId());
-        existing.setImpactSummary(s.getImpactSummary());
-        existing.setResolvedTime(s.getResolvedTime());
-        existing.setStatus(s.getStatus());
-
-        validate(existing);
-        return repository.save(existing);
-    }
-
     //  DELETE
     public void delete(Long id) {
         findById(id);
         repository.deleteById(id);
-    }
-
-    //  VALIDATION
-    private void validate(EnvironmentalIncident entity) {
-
-        if (!dataHallRepository.existsById(entity.getHallId())) {
-            throw new ResourceNotFoundException("DataHall", entity.getHallId());
-        }
-
-        if (entity.getAssignedEngineerId() != null &&
-                !userRepository.existsById(entity.getAssignedEngineerId())) {
-            throw new ResourceNotFoundException("User", entity.getAssignedEngineerId());
-        }
-
-        if (entity.getResolvedTime() != null &&
-                entity.getResolvedTime().isBefore(entity.getStartTime())) {
-            throw new IllegalArgumentException("resolvedTime cannot be before startTime");
-        }
     }
 
     //  RESOLVE INCIDENT (IMPORTANT)
@@ -90,6 +43,10 @@ public class EnvironmentalIncidentService {
 
         EnvironmentalIncident incident = findById(id);
 
+        if (incident.getStatus() == IncidentStatus.RESOLVED) {
+            throw new IllegalArgumentException("Incident already resolved");
+        }
+        
         incident.setStatus(IncidentStatus.RESOLVED);
         incident.setResolvedTime(LocalDateTime.now());
 

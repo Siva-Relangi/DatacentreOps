@@ -42,16 +42,6 @@ public class EnvironmentalReadingController {
         return EnvironmentalReadingMapper.toDTO(service.findById(id));
     }
 
-    @PutMapping("/{id}")
-    public EnvironmentalReadingResponseDTO update(
-            @PathVariable Long id,
-            @Valid @RequestBody EnvironmentalReadingRequestDTO dto) {
-
-        return EnvironmentalReadingMapper.toDTO(
-                service.update(id, EnvironmentalReadingMapper.toEntity(dto))
-        );
-    }
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);

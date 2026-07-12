@@ -1,11 +1,15 @@
 package com.datacentreops.workorder.service;
 
 import com.datacentreops.common.ResourceNotFoundException;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.iam.repository.UserRepository;
 import com.datacentreops.workorder.entity.WorkOrderNote;
 import com.datacentreops.workorder.repository.WorkOrderNoteRepository;
 import com.datacentreops.workorder.repository.WorkOrderRepository;
 import org.springframework.stereotype.Service;
+import com.datacentreops.iam.entity.EntityType;
 
 import java.util.List;
 
@@ -15,22 +19,35 @@ public class WorkOrderNoteService {
     private final WorkOrderNoteRepository repository;
     private final WorkOrderRepository workOrderRepository;
     private final UserRepository userRepository;
+    private final AuditLogRepository auditLogRepository;
 
     public WorkOrderNoteService(
             WorkOrderNoteRepository repository,
             WorkOrderRepository workOrderRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AuditLogRepository auditLogRepository) {
 
         this.repository = repository;
         this.workOrderRepository = workOrderRepository;
         this.userRepository = userRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  CREATE
     public WorkOrderNote create(WorkOrderNote note) {
 
         validate(note);
-        return repository.save(note);
+
+        WorkOrderNote saved = repository.save(note);
+
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.CREATE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(saved.getNoteId());
+
+        auditLogRepository.save(audit);
+
+        return saved;
     }
 
     //  GET ALL
@@ -47,6 +64,12 @@ public class WorkOrderNoteService {
     //  DELETE
     public void delete(Long id) {
         findById(id);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.DELETE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(id);
+
+        auditLogRepository.save(audit);
         repository.deleteById(id);
     }
 

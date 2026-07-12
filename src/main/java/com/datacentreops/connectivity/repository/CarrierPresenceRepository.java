@@ -11,6 +11,10 @@ public interface CarrierPresenceRepository extends JpaRepository<CarrierPresence
 
     List<CarrierPresence> findByDataCentreId(Long dataCentreId);
 
+    boolean existsByCarrierNameAndDataCentreId(String carrierName, Long dataCentreId);
+
+    boolean existsByCarrierNameAndDataCentreIdAndCarrierIdNot(String carrierName, Long dataCentreId, Long carrierId);
+
     List<CarrierPresence> findByStatus(CarrierStatus status);
 
     List<CarrierPresence> findByServiceType(ServiceType serviceType);

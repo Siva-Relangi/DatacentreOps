@@ -5,17 +5,6 @@ import com.datacentreops.notification.entity.Notification;
 
 public class NotificationMapper {
 
-    public static Notification toEntity(NotificationRequestDTO dto) {
-
-        Notification n = new Notification();
-
-        n.setUserId(dto.getUserId());
-        n.setMessage(dto.getMessage());
-        n.setCategory(dto.getCategory());
-
-        return n;
-    }
-
     public static NotificationResponseDTO toDTO(Notification entity) {
 
         NotificationResponseDTO dto = new NotificationResponseDTO();

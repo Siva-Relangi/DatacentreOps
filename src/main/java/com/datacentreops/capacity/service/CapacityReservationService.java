@@ -4,9 +4,6 @@ import com.datacentreops.capacity.entity.CapacityReservation;
 import com.datacentreops.capacity.entity.ReservationStatus;
 import com.datacentreops.capacity.repository.CapacityReservationRepository;
 import com.datacentreops.common.ResourceNotFoundException;
-import com.datacentreops.customer.repository.ColoCustomerRepository;
-import com.datacentreops.infrastructure.entity.DataHall;
-import com.datacentreops.infrastructure.repository.DataHallRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

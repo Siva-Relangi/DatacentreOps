@@ -11,6 +11,7 @@ import com.datacentreops.infrastructure.entity.Rack;
 import com.datacentreops.infrastructure.repository.InstalledAssetRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
 import com.datacentreops.notification.entity.Notification;
+import com.datacentreops.notification.entity.NotificationCategory;
 import com.datacentreops.notification.repository.NotificationRepository;
 import com.datacentreops.workorder.entity.WorkOrder;
 import com.datacentreops.workorder.entity.WorkOrderStatus;
@@ -59,7 +60,16 @@ public class WorkOrderService {
     //  CREATE
     public WorkOrder create(WorkOrder w) {
         validate(w);
-        return repository.save(w);
+        WorkOrder saved = repository.save(w);
+
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.CREATE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(saved.getWorkOrderId());
+
+        auditLogRepository.save(audit);
+
+        return saved;
     }
 
     //  GET ALL
@@ -87,6 +97,11 @@ public class WorkOrderService {
         existing.setRequestedById(w.getRequestedById());
 
         validate(existing);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.UPDATE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(existing.getWorkOrderId());
+        auditLogRepository.save(audit);
         return repository.save(existing);
     }
 
@@ -99,6 +114,11 @@ public class WorkOrderService {
         }
 
         findById(id);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.DELETE);
+        audit.setEntityType(EntityType.WORK_ORDER);
+        audit.setRecordId(id);
+        auditLogRepository.save(audit);
         repository.deleteById(id);
     }
 
@@ -122,8 +142,14 @@ public class WorkOrderService {
             InstalledAsset asset = assetRepository.findById(w.getAssetId())
                     .orElseThrow(() -> new ResourceNotFoundException("Asset", w.getAssetId()));
 
-            if(!asset.getRackId().equals(w.getRackId())){
-                throw new IllegalArgumentException("Asset does not belong to selected rack");
+            if (w.getRackId() == null) {
+                throw new IllegalArgumentException(
+                        "Rack is required when Asset is selected");
+            }
+
+            if (!asset.getRackId().equals(w.getRackId())) {
+                throw new IllegalArgumentException(
+                        "Asset does not belong to selected rack");
             }
         }
 
@@ -143,9 +169,13 @@ public class WorkOrderService {
         workOrder.setAssignedEngineerId(engineerId);
         workOrder.setStatus(WorkOrderStatus.ASSIGNED);
         WorkOrder saved = repository.save(workOrder);
+
         Notification notification = new Notification();
         notification.setUserId(engineerId);
-        notification.setMessage("Work Order " + saved.getWorkOrderId() + " assigned to you");
+        notification.setCategory(NotificationCategory.WORK_ORDER);
+        notification.setMessage(
+                "Work Order " + saved.getWorkOrderId() + " assigned to you");
+
         notificationRepository.save(notification);
 
         AuditLog audit = new AuditLog();
@@ -168,9 +198,13 @@ public class WorkOrderService {
         }
         
         WorkOrder saved = repository.save(workOrder);
+
         Notification notification = new Notification();
         notification.setUserId(saved.getRequestedById());
-        notification.setMessage("Work Order " + saved.getWorkOrderId() + " changed to " + status);
+        notification.setCategory(NotificationCategory.WORK_ORDER);
+        notification.setMessage(
+                "Work Order " + saved.getWorkOrderId() + " changed to " + status);
+
         notificationRepository.save(notification);
 
         AuditLog audit = new AuditLog();

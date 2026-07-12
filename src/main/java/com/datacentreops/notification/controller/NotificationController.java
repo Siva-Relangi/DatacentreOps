@@ -19,14 +19,6 @@ public class NotificationController {
         this.service = service;
     }
 
-    @PostMapping
-    public NotificationResponseDTO create(@Valid  @RequestBody NotificationRequestDTO dto) {
-
-        return NotificationMapper.toDTO(
-                service.create(NotificationMapper.toEntity(dto))
-        );
-    }
-
     @GetMapping
     public List<NotificationResponseDTO> getAll() {
 

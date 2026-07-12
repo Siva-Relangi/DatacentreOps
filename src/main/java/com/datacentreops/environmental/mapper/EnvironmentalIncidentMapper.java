@@ -5,18 +5,6 @@ import com.datacentreops.environmental.entity.EnvironmentalIncident;
 
 public class EnvironmentalIncidentMapper {
 
-    public static EnvironmentalIncident toEntity(EnvironmentalIncidentRequestDTO dto) {
-
-        EnvironmentalIncident e = new EnvironmentalIncident();
-
-        e.setHallId(dto.getHallId());
-        e.setIncidentType(dto.getIncidentType());
-        e.setAssignedEngineerId(dto.getAssignedEngineerId());
-        e.setImpactSummary(dto.getImpactSummary());
-
-        return e;
-    }
-
     public static EnvironmentalIncidentResponseDTO toDTO(EnvironmentalIncident entity) {
 
         EnvironmentalIncidentResponseDTO dto = new EnvironmentalIncidentResponseDTO();

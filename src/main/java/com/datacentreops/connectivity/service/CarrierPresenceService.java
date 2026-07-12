@@ -1,29 +1,50 @@
 package com.datacentreops.connectivity.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.connectivity.entity.CarrierPresence;
 import com.datacentreops.connectivity.entity.CarrierStatus;
 import com.datacentreops.connectivity.repository.CarrierPresenceRepository;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+import com.datacentreops.connectivity.repository.CrossConnectRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.repository.AuditLogRepository;
+import com.datacentreops.iam.entity.EntityType;
 
 @Service
 public class CarrierPresenceService {
 
     private final CarrierPresenceRepository repository;
+    private final CrossConnectRepository crossConnectRepository;
+    private final AuditLogRepository auditLogRepository;
 
-    public CarrierPresenceService(CarrierPresenceRepository repository) {
+    public CarrierPresenceService(CarrierPresenceRepository repository, CrossConnectRepository   crossConnectRepository, AuditLogRepository auditLogRepository) {
         this.repository = repository;
+        this.crossConnectRepository = crossConnectRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     // CREATE
     public CarrierPresence create(CarrierPresence entity) {
 
-        if(repository.findByDataCentreId(entity.getDataCentreId()).stream().anyMatch(c -> c.getCarrierName().equalsIgnoreCase(entity.getCarrierName()))){
-            throw new IllegalArgumentException("Carrier already exists in this Data Centre");
+        if (repository.existsByCarrierNameAndDataCentreId(entity.getCarrierName(), entity.getDataCentreId())) {
+
+            throw new IllegalArgumentException(
+                    "Carrier already exists in this Data Centre");
         }
-        return repository.save(entity);
+        CarrierPresence saved= repository.save(entity);
+
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.CREATE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(saved.getCarrierId());
+
+        auditLogRepository.save(audit);
+
+        return saved;
     }
 
     //  GET ALL
@@ -42,8 +63,10 @@ public class CarrierPresenceService {
 
         CarrierPresence existing = findById(id);
 
-        if(repository.findByDataCentreId(existing.getDataCentreId()).stream().anyMatch(name -> name.getCarrierName().equalsIgnoreCase(c.getCarrierName()))){
-            throw new IllegalArgumentException("Carrier already exists in this Data Centre");
+        if (repository.existsByCarrierNameAndDataCentreIdAndCarrierIdNot(c.getCarrierName(), c.getDataCentreId(), id)) {
+
+            throw new IllegalArgumentException(
+                    "Carrier already exists in this Data Centre");
         }
 
         existing.setCarrierName(c.getCarrierName());
@@ -52,12 +75,27 @@ public class CarrierPresenceService {
         existing.setMmrCabinetId(c.getMmrCabinetId());
         existing.setStatus(c.getStatus());
 
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.UPDATE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(existing.getCarrierId());
+        auditLogRepository.save(audit);
+        
         return repository.save(existing);
     }
 
     //  DELETE
     public void delete(Long id) {
-        findById(id);
+        CarrierPresence carrier = findById(id);
+        if (!crossConnectRepository.findByCarrierId(id).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Cannot delete Carrier. Cross Connections exist.");
+        }
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.DELETE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(carrier.getCarrierId());
+        auditLogRepository.save(audit);
         repository.deleteById(id);
     }
 

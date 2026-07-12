@@ -6,9 +6,8 @@ import com.datacentreops.connectivity.entity.CrossConnectStatus;
 import com.datacentreops.connectivity.repository.CarrierPresenceRepository;
 import com.datacentreops.connectivity.repository.CrossConnectRepository;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
-import com.datacentreops.iam.entity.AuditAction;
-import com.datacentreops.iam.entity.AuditLog;
 import com.datacentreops.iam.repository.AuditLogRepository;
+import com.datacentreops.iam.repository.UserRepository;
 import com.datacentreops.infrastructure.entity.InstalledAsset;
 import com.datacentreops.infrastructure.repository.InstalledAssetRepository;
 import com.datacentreops.infrastructure.repository.RackRepository;
@@ -32,6 +31,7 @@ public class CrossConnectService {
     private final InstalledAssetRepository assetRepository;
     private final NotificationRepository notificationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final UserRepository userRepository;
 
     public CrossConnectService(
             CrossConnectRepository repository,
@@ -40,7 +40,8 @@ public class CrossConnectService {
             RackRepository rackRepository,
             InstalledAssetRepository assetRepository, 
             NotificationRepository notificationRepository, 
-            AuditLogRepository auditLogRepository) {
+            AuditLogRepository auditLogRepository,
+            UserRepository userRepository) {
 
         this.repository = repository;
         this.customerRepository = customerRepository;
@@ -49,13 +50,23 @@ public class CrossConnectService {
         this.assetRepository = assetRepository;
         this.notificationRepository = notificationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.userRepository = userRepository;
     }
 
     //  CREATE
     public CrossConnect create(CrossConnect entity) {
 
         validate(entity);
-        return repository.save(entity);
+        CrossConnect saved = repository.save(entity);
+
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.CREATE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(saved.getCrossConnectId());
+
+        auditLogRepository.save(audit);
+
+        return saved;
     }
 
     //  GET ALL
@@ -88,12 +99,22 @@ public class CrossConnectService {
         existing.setStatus(s.getStatus());
 
         validate(existing);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.UPDATE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(existing.getCrossConnectId());
+        auditLogRepository.save(audit);
         return repository.save(existing);
     }
 
     //  DELETE
     public void delete(Long id) {
         findById(id);
+        AuditLog audit = new AuditLog();
+        audit.setAction(AuditAction.DELETE);
+        audit.setEntityType(EntityType.CONNECTIVITY);
+        audit.setRecordId(id);
+        auditLogRepository.save(audit);
         repository.deleteById(id);
     }
 
@@ -147,11 +168,24 @@ public class CrossConnectService {
         if (status == CrossConnectStatus.PROVISIONED) {
             crossConnect.setProvisionedDate(LocalDate.now());
         }
+
         CrossConnect saved = repository.save(crossConnect);
+
+        User admin = userRepository.findByRole(Role.ADMIN)
+                    .stream()
+                    .filter(user -> user.getStatus() == UserStatus.ACTIVE)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No active admin found"));
+
         Notification notification = new Notification();
-        notification.setUserId(saved.getCustomerId());
-        notification.setMessage("Cross Connect " + saved.getCrossConnectId() + " changed to " + status);
+        notification.setUserId(admin.getUserId());
+        notification.setCategory(NotificationCategory.CROSS_CONNECT);
+        notification.setMessage(
+                "Cross Connect " + saved.getCrossConnectId() + " changed to " + status);
+
         notificationRepository.save(notification);
+
+
         AuditLog audit = new AuditLog();
         audit.setAction(AuditAction.STATUS_CHANGE);
         audit.setEntityType(EntityType.CONNECTIVITY);

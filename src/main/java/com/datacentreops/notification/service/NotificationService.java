@@ -20,16 +20,6 @@ public class NotificationService {
         this.userRepository = userRepository;
     }
 
-    //  CREATE
-    public Notification create(Notification n) {
-
-        if (!userRepository.existsById(n.getUserId())) {
-            throw new ResourceNotFoundException("User", n.getUserId());
-        }
-
-        return repository.save(n);
-    }
-
     //  GET ALL
     public List<Notification> findAll() {
         return repository.findAll();

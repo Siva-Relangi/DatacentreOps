@@ -77,7 +77,7 @@ public class ColoCustomerService {
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.UPDATE);
         log.setEntityType(EntityType.CUSTOMER);
-        log.setRecordId(entity.getCustomerId());
+        log.setRecordId(existing.getCustomerId());
         auditLogRepository.save(log);
 
         return repository.save(existing);

@@ -89,7 +89,7 @@ public class ColoContractService {
         AuditLog log = new AuditLog();
         log.setAction(AuditAction.UPDATE);
         log.setEntityType(EntityType.CUSTOMER);
-        log.setRecordId(entity.getContractId());
+        log.setRecordId(existing.getContractId());
         auditLogRepository.save(log);
 
         return repository.save(existing);

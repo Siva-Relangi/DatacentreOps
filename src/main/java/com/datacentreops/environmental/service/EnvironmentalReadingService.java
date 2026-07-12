@@ -9,6 +9,7 @@ import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.environmental.repository.EnvironmentalIncidentRepository;
 import com.datacentreops.infrastructure.repository.DataHallRepository;
 import com.datacentreops.notification.repository.NotificationRepository;
+import com.datacentreops.iam.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -22,38 +23,43 @@ public class EnvironmentalReadingService {
     private final EnvironmentalIncidentRepository incidentRepository;
     private final NotificationRepository notificationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final UserRepository userRepository;
 
     public EnvironmentalReadingService(EnvironmentalReadingRepository repository,
                                        DataHallRepository dataHallRepository,
                                        EnvironmentalIncidentRepository incidentRepository,
                                        NotificationRepository notificationRepository,
-                                       AuditLogRepository auditLogRepository) {
+                                       AuditLogRepository auditLogRepository,
+                                       UserRepository userRepository) {
         this.repository = repository;
         this.dataHallRepository = dataHallRepository;
         this.incidentRepository = incidentRepository;
         this.notificationRepository = notificationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.userRepository = userRepository;
     }
 
     //  CREATE
     public EnvironmentalReading create(EnvironmentalReading reading) {
         validate(reading);
         if (reading.getReadingType() == ReadingType.TEMPERATURE && reading.getValue() != null) {
+            
+            if (reading.getValue() >= 40) {
+                reading.setStatus(ReadingStatus.CRITICAL);
+            }
+        
             if (reading.getValue() >= 35) {
                 reading.setStatus(ReadingStatus.WARNING);
             }
 
-            if (reading.getValue() >= 40) {
-                reading.setStatus(ReadingStatus.CRITICAL);
-            }
         }
 
         if (reading.getReadingType() == ReadingType.HUMIDITY && reading.getValue() != null) {
-            if (reading.getValue() >= 70) {
-                reading.setStatus(ReadingStatus.WARNING);
-            }
             if (reading.getValue() >= 85) {
                 reading.setStatus(ReadingStatus.CRITICAL);
+            }
+            if (reading.getValue() >= 70) {
+                reading.setStatus(ReadingStatus.WARNING);
             }
         }
         EnvironmentalReading saved = repository.save(reading);
@@ -72,8 +78,24 @@ public class EnvironmentalReadingService {
             incident.setImpactSummary("Auto generated from sensor " + saved.getSensorId() + " value=" + saved.getValue());
             incidentRepository.save(incident);
 
+            List<User> admins = userRepository.findByRole(Role.ADMIN);
+
+            if (admins.isEmpty()) {
+                throw new ResourceNotFoundException("Admin", 0L);
+            }
+
+            User admin = userRepository.findByRole(Role.ADMIN)
+                        .stream()
+                        .filter(user -> user.getStatus() == UserStatus.ACTIVE)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("No active admin found"));
+
             Notification notification = new Notification();
-            notification.setMessage( "Critical Environmental Incident detected in Hall " + saved.getHallId());
+            notification.setUserId(admin.getUserId());
+            notification.setCategory(NotificationCategory.ENVIRONMENTAL);
+            notification.setMessage(
+                    "Critical Environmental Incident detected in Hall " + saved.getHallId());
+
             notificationRepository.save(notification);
 
             AuditLog audit = new AuditLog();
@@ -95,21 +117,6 @@ public class EnvironmentalReadingService {
     public EnvironmentalReading findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("EnvironmentalReading", id));
-    }
-
-    //  UPDATE
-    public EnvironmentalReading update(Long id, EnvironmentalReading s) {
-
-        EnvironmentalReading existing = findById(id);
-
-        existing.setHallId(s.getHallId());
-        existing.setSensorId(s.getSensorId());
-        existing.setReadingType(s.getReadingType());
-        existing.setValue(s.getValue());
-        existing.setUnit(s.getUnit());
-
-        validate(existing);
-        return repository.save(existing);
     }
 
     //  DELETE

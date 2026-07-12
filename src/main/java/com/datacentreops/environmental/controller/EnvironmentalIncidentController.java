@@ -4,7 +4,6 @@ import com.datacentreops.environmental.dto.*;
 import com.datacentreops.environmental.entity.*;
 import com.datacentreops.environmental.mapper.EnvironmentalIncidentMapper;
 import com.datacentreops.environmental.service.EnvironmentalIncidentService;
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,14 +16,6 @@ public class EnvironmentalIncidentController {
 
     public EnvironmentalIncidentController(EnvironmentalIncidentService service) {
         this.service = service;
-    }
-
-    @PostMapping
-    public EnvironmentalIncidentResponseDTO create(@Valid @RequestBody EnvironmentalIncidentRequestDTO dto) {
-
-        return EnvironmentalIncidentMapper.toDTO(
-                service.create(EnvironmentalIncidentMapper.toEntity(dto))
-        );
     }
 
     @GetMapping
@@ -40,16 +31,6 @@ public class EnvironmentalIncidentController {
     public EnvironmentalIncidentResponseDTO getById(@PathVariable Long id) {
 
         return EnvironmentalIncidentMapper.toDTO(service.findById(id));
-    }
-
-    @PutMapping("/{id}")
-    public EnvironmentalIncidentResponseDTO update(
-            @PathVariable Long id,
-            @Valid @RequestBody EnvironmentalIncidentRequestDTO dto) {
-
-        return EnvironmentalIncidentMapper.toDTO(
-                service.update(id, EnvironmentalIncidentMapper.toEntity(dto))
-        );
     }
 
     @DeleteMapping("/{id}")
