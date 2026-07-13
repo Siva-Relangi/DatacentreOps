@@ -24,6 +24,8 @@ public class WorkOrderNote {
 
     private Long authorId;
 
+    private Long incidentId;
+
     @Column(nullable = false, length = 2000)
     private String noteText;
 

@@ -5,7 +5,9 @@ import com.datacentreops.iam.entity.AuditAction;
 import com.datacentreops.iam.entity.AuditLog;
 import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.iam.repository.UserRepository;
+import com.datacentreops.workorder.entity.WorkOrder;
 import com.datacentreops.workorder.entity.WorkOrderNote;
+import com.datacentreops.workorder.entity.WorkOrderStatus;
 import com.datacentreops.workorder.repository.WorkOrderNoteRepository;
 import com.datacentreops.workorder.repository.WorkOrderRepository;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,16 @@ public class WorkOrderNoteService {
 
         validate(note);
 
+        WorkOrder workOrder = workOrderRepository.findById(note.getWorkOrderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Workorder", note.getWorkOrderId()));
+
+        if(workOrder.getStatus() == WorkOrderStatus.ASSIGNED){
+            workOrder.setStatus(WorkOrderStatus.IN_PROGRESS);
+            workOrderRepository.save(workOrder);
+        }
+
         WorkOrderNote saved = repository.save(note);
+
 
         AuditLog audit = new AuditLog();
         audit.setAction(AuditAction.CREATE);

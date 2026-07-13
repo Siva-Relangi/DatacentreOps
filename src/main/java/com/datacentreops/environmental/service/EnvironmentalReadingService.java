@@ -48,7 +48,7 @@ public class EnvironmentalReadingService {
                 reading.setStatus(ReadingStatus.CRITICAL);
             }
         
-            if (reading.getValue() >= 35) {
+            else if (reading.getValue() >= 35) {
                 reading.setStatus(ReadingStatus.WARNING);
             }
 
@@ -58,7 +58,7 @@ public class EnvironmentalReadingService {
             if (reading.getValue() >= 85) {
                 reading.setStatus(ReadingStatus.CRITICAL);
             }
-            if (reading.getValue() >= 70) {
+            else if (reading.getValue() >= 70) {
                 reading.setStatus(ReadingStatus.WARNING);
             }
         }
@@ -106,7 +106,7 @@ public class EnvironmentalReadingService {
         }
         return saved;
     }
- 
+
 
     //  GET ALL
     public List<EnvironmentalReading> findAll() {

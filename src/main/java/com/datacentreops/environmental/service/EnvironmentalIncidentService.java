@@ -3,6 +3,10 @@ package com.datacentreops.environmental.service;
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.environmental.entity.*;
 import com.datacentreops.environmental.repository.EnvironmentalIncidentRepository;
+import com.datacentreops.iam.entity.AuditAction;
+import com.datacentreops.iam.entity.AuditLog;
+import com.datacentreops.iam.entity.EntityType;
+import com.datacentreops.iam.repository.AuditLogRepository;
 import com.datacentreops.iam.repository.UserRepository;
 import com.datacentreops.infrastructure.repository.DataHallRepository;
 import org.springframework.stereotype.Service;
@@ -14,11 +18,14 @@ import java.util.List;
 public class EnvironmentalIncidentService {
 
     private final EnvironmentalIncidentRepository repository;
+    private final AuditLogRepository auditLogRepository;
 
     public EnvironmentalIncidentService(
-            EnvironmentalIncidentRepository repository) {
+            EnvironmentalIncidentRepository repository,
+            AuditLogRepository auditLogRepository) {
 
         this.repository = repository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     //  GET ALL
@@ -49,6 +56,12 @@ public class EnvironmentalIncidentService {
         
         incident.setStatus(IncidentStatus.RESOLVED);
         incident.setResolvedTime(LocalDateTime.now());
+
+        AuditLog log = new AuditLog();
+        log.setAction(AuditAction.STATUS_CHANGE);
+        log.setEntityType(EntityType.ENVIRONMENTAL);
+        log.setRecordId(incident.getIncidentId());
+        auditLogRepository.save(log);
 
         return repository.save(incident);
     }

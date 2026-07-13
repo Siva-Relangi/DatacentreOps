@@ -9,7 +9,6 @@ public record RegisterRequest(
         @NotBlank String name,
         @Email @NotBlank String email,
         @NotBlank @Size(min = 6, message = "password must be at least 6 characters") String password,
-        String role,
         String phone,
         Long organisationId,
         Long dataCentreId) {

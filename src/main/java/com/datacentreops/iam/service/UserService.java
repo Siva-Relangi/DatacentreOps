@@ -48,6 +48,11 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", email));
     }
 
+    //Exists By Email
+    public boolean existsByEmail(String email){
+        return repository.existsByEmail(email);
+    }
+
     //  UPDATE
     public User update(Long id, User u) {
 

@@ -12,6 +12,7 @@ public class WorkOrderMapper {
         w.setCustomerId(dto.getCustomerId());
         w.setRackId(dto.getRackId());
         w.setAssetId(dto.getAssetId());
+        w.setIncidentId(dto.getIncidentId());
         w.setRequestType(dto.getRequestType());
         w.setDescription(dto.getDescription());
         w.setPriority(dto.getPriority());
@@ -29,6 +30,7 @@ public class WorkOrderMapper {
         dto.setRackId(entity.getRackId());
         dto.setAssetId(entity.getAssetId());
         dto.setRequestType(entity.getRequestType());
+        dto.setIncidentId(entity.getIncidentId());
         dto.setDescription(entity.getDescription());
         dto.setPriority(entity.getPriority());
         dto.setRequestedById(entity.getRequestedById());

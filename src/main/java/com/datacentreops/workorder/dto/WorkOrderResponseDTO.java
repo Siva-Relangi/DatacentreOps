@@ -14,6 +14,7 @@ public class WorkOrderResponseDTO {
     private Long customerId;
     private Long rackId;
     private Long assetId;
+    private Long incidentId;
     private WorkOrderType requestType;
     private String description;
     private WorkOrderPriority priority;

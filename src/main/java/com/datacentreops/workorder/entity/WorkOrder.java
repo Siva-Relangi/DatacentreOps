@@ -1,5 +1,6 @@
 package com.datacentreops.workorder.entity;
 
+import com.datacentreops.iam.repository.AuditLogRepository;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,8 @@ public class WorkOrder {
     private Long customerId;
 
     private Long rackId;
+
+    private Long incidentId;
 
     private Long assetId;
 

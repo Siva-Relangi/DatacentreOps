@@ -2,6 +2,8 @@ package com.datacentreops.workorder.service;
 
 import com.datacentreops.common.ResourceNotFoundException;
 import com.datacentreops.customer.repository.ColoCustomerRepository;
+import com.datacentreops.environmental.entity.EnvironmentalIncident;
+import com.datacentreops.environmental.repository.EnvironmentalIncidentRepository;
 import com.datacentreops.iam.entity.AuditAction;
 import com.datacentreops.iam.entity.AuditLog;
 import com.datacentreops.iam.repository.AuditLogRepository;
@@ -36,6 +38,7 @@ public class WorkOrderService {
     private final WorkOrderNoteRepository noteRepository;
     private final NotificationRepository notificationRepository;
     private final AuditLogRepository auditLogRepository;
+    private final EnvironmentalIncidentRepository incidentRepository;
 
     public WorkOrderService(
             WorkOrderRepository repository,
@@ -45,7 +48,8 @@ public class WorkOrderService {
             UserRepository userRepository,
             WorkOrderNoteRepository noteRepository,
             NotificationRepository notificationRepository,
-            AuditLogRepository auditLogRepository) {
+            AuditLogRepository auditLogRepository,
+            EnvironmentalIncidentRepository incidentRepository) {
 
         this.repository = repository;
         this.customerRepository = customerRepository;
@@ -55,6 +59,7 @@ public class WorkOrderService {
         this.noteRepository = noteRepository;
         this.notificationRepository = notificationRepository;
         this.auditLogRepository = auditLogRepository;
+        this.incidentRepository = incidentRepository;
     }
 
     //  CREATE
@@ -90,6 +95,7 @@ public class WorkOrderService {
 
         existing.setCustomerId(w.getCustomerId());
         existing.setRackId(w.getRackId());
+        existing.setIncidentId(w.getIncidentId());
         existing.setAssetId(w.getAssetId());
         existing.setRequestType(w.getRequestType());
         existing.setDescription(w.getDescription());
@@ -169,6 +175,13 @@ public class WorkOrderService {
         workOrder.setAssignedEngineerId(engineerId);
         workOrder.setStatus(WorkOrderStatus.ASSIGNED);
         WorkOrder saved = repository.save(workOrder);
+
+        if(workOrder.getIncidentId() != null){
+            EnvironmentalIncident incident = incidentRepository.findById(workOrder.getIncidentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Incident", workOrder.getIncidentId()));
+            incident.setAssignedEngineerId(engineerId);
+            incidentRepository.save(incident);
+        }
 
         Notification notification = new Notification();
         notification.setUserId(engineerId);

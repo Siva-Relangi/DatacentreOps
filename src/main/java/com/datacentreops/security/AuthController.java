@@ -33,7 +33,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
 
-        if (userService.findByEmail(req.email()) != null) {
+        if (userService.existsByEmail(req.email())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
@@ -48,7 +48,6 @@ public class AuthController {
         user.setStatus(UserStatus.ACTIVE);  //  ENUM
 
         User saved = userService.create(user);
-
         audit(saved.getUserId(), AuditAction.REGISTER);
 
         String token = jwtService.generateToken(
